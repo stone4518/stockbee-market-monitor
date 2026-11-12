@@ -166,17 +166,17 @@ struct IndicatorTable: View {
         VStack(spacing: 0) {
             HStack(spacing: 6) {
                 Text("指标").frame(maxWidth: .infinity, alignment: .leading)
-                Text("当前值").frame(width: 150, alignment: .leading)
-                Text("正常").frame(width: 78, alignment: .leading)
+                Text("当前值").frame(width: 128, alignment: .leading)
+                Text("正常").frame(width: 74, alignment: .leading)
                 Text("理想做多").frame(width: 70, alignment: .leading)
                 Text("状态").frame(width: 48, alignment: .leading)
             }
             .font(.subheadline.bold()).padding(.vertical, 7).padding(.horizontal, 6).background(Palette.background)
             ForEach(rows) { r in
                 HStack(spacing: 6) {
-                    Text(r.name).font(.system(size: 12.5, weight: .medium)).frame(maxWidth: .infinity, alignment: .leading)
-                    Text(r.value).font(.system(size: 12.5).monospacedDigit()).lineLimit(1).truncationMode(.tail).frame(width: 150, alignment: .leading)
-                    Text(r.normal).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1).frame(width: 78, alignment: .leading)
+                    Text(r.name).font(.system(size: 12.5, weight: .medium)).lineLimit(1).minimumScaleFactor(0.8).frame(maxWidth: .infinity, alignment: .leading)
+                    Text(r.value).font(.system(size: 12.5).monospacedDigit()).lineLimit(1).truncationMode(.tail).frame(width: 128, alignment: .leading)
+                    Text(r.normal).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1).frame(width: 74, alignment: .leading)
                     Text(r.ideal).font(.system(size: 12)).foregroundStyle(.secondary).frame(width: 70, alignment: .leading)
                     Text(r.state).font(.system(size: 12, weight: .bold)).foregroundStyle(color(r.state)).frame(width: 48, alignment: .leading)
                 }

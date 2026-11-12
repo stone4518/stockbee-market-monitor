@@ -348,7 +348,7 @@ public enum Scorer {
         let t = latest?.t2108
         items.append(ScoreItem(name: "T2108 市场广度", maxScore: 20, score: t.map(t2108Points), value: t.map { String(format: "%.2f%%", $0) } ?? "N/A",
                                rule: "≥70:20 ≥60:17 ≥50:12 ≥40:7 其余0",
-                               detail: t == nil ? "官方表格未提供 T2108" : "Stockbee 表格 T2108 列（Worden 普通股高于40日均线占比）；非 Russell 3000 口径"))
+                               detail: latest == nil ? missing : t == nil ? "官方表格未提供 T2108" : "Stockbee 表格 T2108 列（Worden 普通股高于40日均线占比）；非 Russell 3000 口径"))
 
         var sector: Int? = nil
         var sectorDetail = "缺少与广度同日、同一行情商的 SPY/XLK/SMH/XLY 行情"
