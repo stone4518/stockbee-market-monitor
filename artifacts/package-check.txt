@@ -1,0 +1,79 @@
++ file 'dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac'
+dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64]
+dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac (for architecture x86_64):	Mach-O 64-bit executable x86_64
+dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac (for architecture arm64):	Mach-O 64-bit executable arm64
++ lipo -info 'dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac'
+Architectures in the fat file: dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac are: x86_64 arm64 
++ codesign -dv 'dist/Stockbee Market Monitor.app'
+Executable=/Users/runner/work/stockbee-market-monitor/stockbee-market-monitor/dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac
+Identifier=dev.stockbee.monitor.mac
+Format=app bundle with Mach-O universal (x86_64 arm64)
+CodeDirectory v=20400 size=8273 flags=0x2(adhoc) hashes=252+3 location=embedded
+Signature=adhoc
+Info.plist entries=14
+TeamIdentifier=not set
+Sealed Resources version=2 rules=13 files=1
+Internal requirements count=0 size=12
++ spctl -a -vv 'dist/Stockbee Market Monitor.app'
+dist/Stockbee Market Monitor.app: rejected
++ echo $'Gatekeeper�\232�\234��\205��\201�\210�\204�\234\237�\211'
+Gatekeeper：未公证（预期）
++ plutil -p 'dist/Stockbee Market Monitor.app/Contents/Info.plist'
+{
+  "CFBundleDevelopmentRegion" => "zh_CN"
+  "CFBundleDisplayName" => "Stockbee 市场环境监控"
+  "CFBundleExecutable" => "StockbeeMac"
+  "CFBundleIconFile" => "AppIcon"
+  "CFBundleIdentifier" => "dev.stockbee.monitor.mac"
+  "CFBundleInfoDictionaryVersion" => "6.0"
+  "CFBundleName" => "Stockbee Market Monitor"
+  "CFBundlePackageType" => "APPL"
+  "CFBundleShortVersionString" => "1.1.0"
+  "CFBundleVersion" => "9"
+  "LSApplicationCategoryType" => "public.app-category.finance"
+  "LSMinimumSystemVersion" => "13.0"
+  "NSHighResolutionCapable" => 1
+  "NSPrincipalClass" => "NSApplication"
+}
++ hdiutil attach dist/StockbeeMarketMonitor.dmg -nobrowse -mountpoint /tmp/sbdmg
+Checksumming Protective Master Boot Record (MBR : 0)…
+Protective Master Boot Record (MBR :: verified   CRC32 $0A05D1AA
+Checksumming GPT Header (Primary GPT Header : 1)…
+ GPT Header (Primary GPT Header : 1): verified   CRC32 $3DCC8BF0
+Checksumming GPT Partition Data (Primary GPT Table : 2)…
+GPT Partition Data (Primary GPT Tabl: verified   CRC32 $C23DBA06
+Checksumming  (Apple_Free : 3)…
+                    (Apple_Free : 3): verified   CRC32 $00000000
+Checksumming disk image (Apple_APFS : 4)…
+         disk image (Apple_APFS : 4): verified   CRC32 $11E6FC61
+Checksumming  (Apple_Free : 5)…
+                    (Apple_Free : 5): verified   CRC32 $00000000
+Checksumming GPT Partition Data (Backup GPT Table : 6)…
+GPT Partition Data (Backup GPT Table: verified   CRC32 $C23DBA06
+Checksumming GPT Header (Backup GPT Header : 7)…
+  GPT Header (Backup GPT Header : 7): verified   CRC32 $E7603B36
+verified   CRC32 $94E751AD
+/dev/disk5          	GUID_partition_scheme          	
+/dev/disk5s1        	Apple_APFS                     	
+/dev/disk6          	EF57347C-0000-11AA-AA11-0030654	
+/dev/disk6s1        	41504653-0000-11AA-AA11-0030654	/private/tmp/sbdmg
++ ls -la /tmp/sbdmg
+total 8
+drwxr-xr-x  5 runner  staff   160 Nov 12 11:31 .
+drwxrwxrwt  5 root    wheel   160 Nov 12 11:31 ..
+-rw-r--r--  1 runner  staff  1217 Nov 12 11:31 安装说明.txt
+lrwxr-xr-x  1 runner  staff    13 Nov 12 11:31 Applications -> /Applications
+drwxr-xr-x  3 runner  staff    96 Nov 12 11:31 Stockbee Market Monitor.app
++ hdiutil detach /tmp/sbdmg
+"disk5" ejected.
++ shasum -a 256 dist/StockbeeMarketMonitor.dmg dist/StockbeeMarketMonitor-macOS.zip 'dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac'
+3fba3275067cd21829c0b8238a5ca3db7b0cab1a1ee060d13f8941068b122e44  dist/StockbeeMarketMonitor.dmg
+0f1abc12c01bfc0e5e9445d1b9d6c3873063399ae9caaf636155648421224837  dist/StockbeeMarketMonitor-macOS.zip
+53af9fcdbe8a9f14dd1d46901439700dfd1cf9e26aff61150be94f5ef1b5575b  dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac
++ ls -la dist
+total 3696
+drwxr-xr-x   5 runner  staff      160 Nov 12 11:31 .
+drwxr-xr-x  19 runner  staff      608 Nov 12 11:29 ..
+drwxr-xr-x   3 runner  staff       96 Nov 12 11:29 Stockbee Market Monitor.app
+-rw-r--r--   1 runner  staff   746954 Nov 12 11:31 StockbeeMarketMonitor-macOS.zip
+-rw-r--r--@  1 runner  staff  1139333 Nov 12 11:31 StockbeeMarketMonitor.dmg

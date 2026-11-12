@@ -1,0 +1,9 @@
+窗口 1480x684
+状态：联网失败，显示缓存：官网页面与官方表格均无法访问：实时：网络不可用（STOCKBEE_FORCE_OFFLINE 测试模式）
+数据日：2026-11-11 · 时效：最新 · 缓存：true
+行情商：Yahoo Finance 日线
+广度渠道：实时版（与发布版交叉核对） · 修订提示：无
+分项：Stockbee Quarter Ratio=8；Stockbee 10D Ratio=0；Stockbee 5D Ratio=0；Stockbee 3D Ratio=5；SPY/QQQ 指数趋势=0；T2108 市场广度=12；XLK/SMH/XLY 板块领导力=3
+总分：待评估 · 等级：待评估 · VCP：数据不完整，暂不依据环境评分开新仓 · HTF：数据不完整，暂停基于评分的 HTF 信号
+阻断：当前显示的是离线缓存（只读），不发布完整评分
+提示：离线缓存保存于 2026年11月12日 上午11:32，仅供查看

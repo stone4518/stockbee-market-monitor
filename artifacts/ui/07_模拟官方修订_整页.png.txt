@@ -1,0 +1,9 @@
+窗口 1480x1013
+状态：官方数据正在修订（已采用实时版 2026-11-11）
+数据日：2026-11-11 · 时效：最新 · 缓存：false
+行情商：Yahoo Finance 日线
+广度渠道：实时版（与发布版交叉核对） · 修订提示：官方数据正在修订：实时版与发布版不一致（已采用实时版）。2026-11-11：4% Up 394/387，4% Down 129/127，Quarter Up 977/976，Quarter Down 1341/1337（实时/发布版）
+分项：Stockbee Quarter Ratio=8；Stockbee 10D Ratio=0；Stockbee 5D Ratio=0；Stockbee 3D Ratio=5；SPY/QQQ 指数趋势=0；T2108 市场广度=12；XLK/SMH/XLY 板块领导力=3
+总分：28 · 等级：D · VCP：暂停新开 VCP 突破仓位 · HTF：暂停新开 HTF 仓位
+阻断：
+提示：

@@ -1,0 +1,78 @@
+{
+  "blockers" : [
+
+  ],
+  "channel" : "实时版（与发布版交叉核对）",
+  "down4" : 129,
+  "freshness" : "最新",
+  "grade" : "D",
+  "htf" : "暂停新开 HTF 仓位",
+  "items" : [
+    {
+      "detail" : "977 ÷ 1341",
+      "max" : 20,
+      "name" : "Stockbee Quarter Ratio",
+      "score" : 8,
+      "value" : "0.73"
+    },
+    {
+      "detail" : "近10个交易日 4%Up 合计 ÷ 4%Down 合计；官方公布 0.89",
+      "max" : 15,
+      "name" : "Stockbee 10D Ratio",
+      "score" : 0,
+      "value" : "0.89"
+    },
+    {
+      "detail" : "近5个交易日 4%Up 合计 ÷ 4%Down 合计；官方公布 0.85",
+      "max" : 5,
+      "name" : "Stockbee 5D Ratio",
+      "score" : 0,
+      "value" : "0.85"
+    },
+    {
+      "detail" : "近3个交易日 4%Up 合计 ÷ 4%Down 合计（官方未公布，按同一定义复算）",
+      "max" : 5,
+      "name" : "Stockbee 3D Ratio",
+      "score" : 5,
+      "value" : "2.26"
+    },
+    {
+      "detail" : "SPY 收盘759.81 MA20 760.20✗ MA50 764.96✗ MA20斜率↓✗；QQQ 收盘690.38 MA20 698.94✗ MA50 719.04✗ MA20斜率↓✗",
+      "max" : 25,
+      "name" : "SPY\/QQQ 指数趋势",
+      "score" : 0,
+      "value" : "SPY 0\/12 · QQQ 0\/12"
+    },
+    {
+      "detail" : "Stockbee 表格 T2108 列（Worden 普通股高于40日均线占比）；非 Russell 3000 口径",
+      "max" : 20,
+      "name" : "T2108 市场广度",
+      "score" : 12,
+      "value" : "50.77%"
+    },
+    {
+      "detail" : "20日相对SPY：XLK -7.26% · SMH -9.07% · XLY +9.91%",
+      "max" : 10,
+      "name" : "XLK\/SMH\/XLY 板块领导力",
+      "score" : 3,
+      "value" : "XLK✗ SMH✗ XLY✓"
+    }
+  ],
+  "latestDate" : "2026-11-11",
+  "quarterDown" : 1341,
+  "quarterRatio" : 0.72856077554064136,
+  "quarterUp" : 977,
+  "quoteVendor" : "Yahoo Finance 日线",
+  "ratio3" : 2.2649122807017545,
+  "ratio5" : 0.84711779448621549,
+  "ratio10" : 0.88754325259515576,
+  "reported5" : 0.84999999999999998,
+  "reported10" : 0.89000000000000001,
+  "revisionNotice" : null,
+  "runAtUTC" : "2026-11-12T11:29:48Z",
+  "source" : "https:\/\/docs.google.com\/spreadsheets\/d\/1O6OhS7ciA8zwfycBfGPbP2fWJnR0pn2UUvFZVDP9jpE\/gviz\/tq?tqx=out:csv",
+  "t2108" : 50.770000000000003,
+  "total" : 28,
+  "up4" : 394,
+  "vcp" : "暂停新开 VCP 突破仓位"
+}

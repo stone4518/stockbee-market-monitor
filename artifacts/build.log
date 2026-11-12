@@ -1,0 +1,9 @@
+== 编译 macOS 原生应用（arm64 + x86_64）==
+dist/Stockbee Market Monitor.app: replacing existing signature
+dist/Stockbee Market Monitor.app: valid on disk
+dist/Stockbee Market Monitor.app: satisfies its Designated Requirement
+== 打包 ZIP / DMG ==
+成功：dist/Stockbee Market Monitor.app（版本 1.1.0 / 9）
+ZIP：dist/StockbeeMarketMonitor-macOS.zip
+DMG：dist/StockbeeMarketMonitor.dmg
+首次打开：右键应用 →“打开”，或在 系统设置 → 隐私与安全性 中点“仍要打开”。

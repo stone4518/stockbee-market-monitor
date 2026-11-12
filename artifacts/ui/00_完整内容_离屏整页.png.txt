@@ -1,0 +1,9 @@
+窗口 1480x928
+状态：已检查：Stockbee 尚无新交易日，最新仍为 2026-11-11
+数据日：2026-11-11 · 时效：最新 · 缓存：false
+行情商：Yahoo Finance 日线
+广度渠道：实时版（与发布版交叉核对） · 修订提示：无
+分项：Stockbee Quarter Ratio=8；Stockbee 10D Ratio=0；Stockbee 5D Ratio=0；Stockbee 3D Ratio=5；SPY/QQQ 指数趋势=0；T2108 市场广度=12；XLK/SMH/XLY 板块领导力=3
+总分：28 · 等级：D · VCP：暂停新开 VCP 突破仓位 · HTF：暂停新开 HTF 仓位
+阻断：
+提示：

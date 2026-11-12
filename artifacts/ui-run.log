@@ -1,0 +1,101 @@
+== 01_正常_1480x1000
+退出码 0
+窗口 1480x684
+状态：已读取最新已发布交易日 2026-11-11
+数据日：2026-11-11 · 时效：最新 · 缓存：false
+行情商：Yahoo Finance 日线
+广度渠道：实时版（与发布版交叉核对） · 修订提示：无
+分项：Stockbee Quarter Ratio=8；Stockbee 10D Ratio=0；Stockbee 5D Ratio=0；Stockbee 3D Ratio=5；SPY/QQQ 指数趋势=0；T2108 市场广度=12；XLK/SMH/XLY 板块领导力=3
+总分：28 · 等级：D · VCP：暂停新开 VCP 突破仓位 · HTF：暂停新开 HTF 仓位
+阻断：
+提示：
+== 00_完整内容_离屏整页
+退出码 0
+窗口 1480x928
+状态：已检查：Stockbee 尚无新交易日，最新仍为 2026-11-11
+数据日：2026-11-11 · 时效：最新 · 缓存：false
+行情商：Yahoo Finance 日线
+广度渠道：实时版（与发布版交叉核对） · 修订提示：无
+分项：Stockbee Quarter Ratio=8；Stockbee 10D Ratio=0；Stockbee 5D Ratio=0；Stockbee 3D Ratio=5；SPY/QQQ 指数趋势=0；T2108 市场广度=12；XLK/SMH/XLY 板块领导力=3
+总分：28 · 等级：D · VCP：暂停新开 VCP 突破仓位 · HTF：暂停新开 HTF 仓位
+阻断：
+提示：
+== 02_最小窗口_990x640
+退出码 0
+窗口 990x668
+状态：已检查：Stockbee 尚无新交易日，最新仍为 2026-11-11
+数据日：2026-11-11 · 时效：最新 · 缓存：false
+行情商：Yahoo Finance 日线
+广度渠道：实时版（与发布版交叉核对） · 修订提示：无
+分项：Stockbee Quarter Ratio=8；Stockbee 10D Ratio=0；Stockbee 5D Ratio=0；Stockbee 3D Ratio=5；SPY/QQQ 指数趋势=0；T2108 市场广度=12；XLK/SMH/XLY 板块领导力=3
+总分：28 · 等级：D · VCP：暂停新开 VCP 突破仓位 · HTF：暂停新开 HTF 仓位
+阻断：
+提示：
+== 03_断网_有缓存
+退出码 0
+窗口 1480x684
+状态：联网失败，显示缓存：官网页面与官方表格均无法访问：实时：网络不可用（STOCKBEE_FORCE_OFFLINE 测试模式）
+数据日：2026-11-11 · 时效：最新 · 缓存：true
+行情商：Yahoo Finance 日线
+广度渠道：实时版（与发布版交叉核对） · 修订提示：无
+分项：Stockbee Quarter Ratio=8；Stockbee 10D Ratio=0；Stockbee 5D Ratio=0；Stockbee 3D Ratio=5；SPY/QQQ 指数趋势=0；T2108 市场广度=12；XLK/SMH/XLY 板块领导力=3
+总分：待评估 · 等级：待评估 · VCP：数据不完整，暂不依据环境评分开新仓 · HTF：数据不完整，暂停基于评分的 HTF 信号
+阻断：当前显示的是离线缓存（只读），不发布完整评分
+提示：离线缓存保存于 2026年11月12日 上午11:32，仅供查看
+== 04_断网_无缓存
+退出码 0
+窗口 1480x684
+状态：联网失败：官网页面与官方表格均无法访问：实时：网络不可用（STOCKBEE_FORCE_OFFLINE 测试模式）
+数据日：— · 时效：— · 缓存：false
+行情商：无
+广度渠道：— · 修订提示：无
+分项：Stockbee Quarter Ratio=N/A；Stockbee 10D Ratio=N/A；Stockbee 5D Ratio=N/A；Stockbee 3D Ratio=N/A；SPY/QQQ 指数趋势=N/A；T2108 市场广度=N/A；XLK/SMH/XLY 板块领导力=N/A
+总分：待评估 · 等级：待评估 · VCP：数据不完整，暂不依据环境评分开新仓 · HTF：数据不完整，暂停基于评分的 HTF 信号
+阻断：Stockbee Quarter Ratio：无广度数据；Stockbee 10D Ratio：需要连续10个交易日数据；Stockbee 5D Ratio：需要连续5个交易日数据；Stockbee 3D Ratio：需要连续3个交易日数据；SPY/QQQ 指数趋势：缺少与广度同日的 SPY/QQQ 行情；T2108 市场广度：无广度数据；XLK/SMH/XLY 板块领导力：缺少与广度同日、同一行情商的 SPY/XLK/SMH/XLY 行情
+提示：
+== 06_模拟官方修订
+退出码 0
+窗口 1480x684
+状态：官方数据正在修订（已采用实时版 2026-11-11）
+数据日：2026-11-11 · 时效：最新 · 缓存：false
+行情商：Yahoo Finance 日线
+广度渠道：实时版（与发布版交叉核对） · 修订提示：官方数据正在修订：实时版与发布版不一致（已采用实时版）。2026-11-11：4% Up 394/387，4% Down 129/127，Quarter Up 977/976，Quarter Down 1341/1337（实时/发布版）
+分项：Stockbee Quarter Ratio=8；Stockbee 10D Ratio=0；Stockbee 5D Ratio=0；Stockbee 3D Ratio=5；SPY/QQQ 指数趋势=0；T2108 市场广度=12；XLK/SMH/XLY 板块领导力=3
+总分：28 · 等级：D · VCP：暂停新开 VCP 突破仓位 · HTF：暂停新开 HTF 仓位
+阻断：
+提示：
+== 07_模拟官方修订_整页
+退出码 0
+窗口 1480x1013
+状态：官方数据正在修订（已采用实时版 2026-11-11）
+数据日：2026-11-11 · 时效：最新 · 缓存：false
+行情商：Yahoo Finance 日线
+广度渠道：实时版（与发布版交叉核对） · 修订提示：官方数据正在修订：实时版与发布版不一致（已采用实时版）。2026-11-11：4% Up 394/387，4% Down 129/127，Quarter Up 977/976，Quarter Down 1341/1337（实时/发布版）
+分项：Stockbee Quarter Ratio=8；Stockbee 10D Ratio=0；Stockbee 5D Ratio=0；Stockbee 3D Ratio=5；SPY/QQQ 指数趋势=0；T2108 市场广度=12；XLK/SMH/XLY 板块领导力=3
+总分：28 · 等级：D · VCP：暂停新开 VCP 突破仓位 · HTF：暂停新开 HTF 仓位
+阻断：
+提示：
+total 3480
+drwxr-xr-x  17 runner  staff     544 Nov 12 11:33 .
+drwxr-xr-x  10 runner  staff     320 Nov 12 11:31 ..
+-rw-r--r--   1 runner  staff  259709 Nov 12 11:31 00_完整内容_离屏整页.png
+-rw-r--r--@  1 runner  staff     560 Nov 12 11:31 00_完整内容_离屏整页.png.txt
+-rw-r--r--   1 runner  staff  192134 Nov 12 11:31 01_正常_1480x1000.png
+-rw-r--r--@  1 runner  staff     539 Nov 12 11:31 01_正常_1480x1000.png.txt
+-rw-r--r--   1 runner  staff  174183 Nov 12 11:32 02_最小窗口_990x640.png
+-rw-r--r--@  1 runner  staff     559 Nov 12 11:32 02_最小窗口_990x640.png.txt
+-rw-r--r--   1 runner  staff  196461 Nov 12 11:32 03_断网_有缓存.png
+-rw-r--r--@  1 runner  staff     830 Nov 12 11:32 03_断网_有缓存.png.txt
+-rw-r--r--   1 runner  staff  175027 Nov 12 11:32 04_断网_无缓存.png
+-rw-r--r--@  1 runner  staff    1040 Nov 12 11:32 04_断网_无缓存.png.txt
+-rw-r--r--@  1 runner  staff  257897 Nov 12 11:33 05_系统截屏_全屏.png
+-rw-r--r--   1 runner  staff  197274 Nov 12 11:32 06_模拟官方修订.png
+-rw-r--r--@  1 runner  staff     747 Nov 12 11:32 06_模拟官方修订.png.txt
+-rw-r--r--   1 runner  staff  290124 Nov 12 11:32 07_模拟官方修订_整页.png
+-rw-r--r--@  1 runner  staff     748 Nov 12 11:32 07_模拟官方修订_整页.png.txt
+scripts/ui-snapshots.sh: line 20:  6189 Terminated: 15          "$APP_BIN"
+total 496
+drwxr-xr-x   4 runner  staff     128 Nov 12 11:33 .
+drwx------+ 35 runner  staff    1120 Nov 12 11:31 ..
+-rw-r--r--   1 runner  staff  126501 Nov 12 11:31 breadth-2026-11-11.json
+-rw-r--r--   1 runner  staff  126481 Nov 12 11:33 latest.json

@@ -1,0 +1,9 @@
+窗口 1480x684
+状态：联网失败：官网页面与官方表格均无法访问：实时：网络不可用（STOCKBEE_FORCE_OFFLINE 测试模式）
+数据日：— · 时效：— · 缓存：false
+行情商：无
+广度渠道：— · 修订提示：无
+分项：Stockbee Quarter Ratio=N/A；Stockbee 10D Ratio=N/A；Stockbee 5D Ratio=N/A；Stockbee 3D Ratio=N/A；SPY/QQQ 指数趋势=N/A；T2108 市场广度=N/A；XLK/SMH/XLY 板块领导力=N/A
+总分：待评估 · 等级：待评估 · VCP：数据不完整，暂不依据环境评分开新仓 · HTF：数据不完整，暂停基于评分的 HTF 信号
+阻断：Stockbee Quarter Ratio：无广度数据；Stockbee 10D Ratio：需要连续10个交易日数据；Stockbee 5D Ratio：需要连续5个交易日数据；Stockbee 3D Ratio：需要连续3个交易日数据；SPY/QQQ 指数趋势：缺少与广度同日的 SPY/QQQ 行情；T2108 市场广度：无广度数据；XLK/SMH/XLY 板块领导力：缺少与广度同日、同一行情商的 SPY/XLK/SMH/XLY 行情
+提示：
