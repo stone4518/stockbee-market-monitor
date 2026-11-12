@@ -8,8 +8,8 @@ macOS 原生 SwiftUI 桌面应用。它自动读取 Stockbee 官网 Market Monit
 
 1. 打开 `StockbeeMarketMonitor.dmg`，把 **Stockbee Market Monitor.app** 拖到“应用程序”文件夹。
 2. **第一次打开**：右键应用 → “打开” → 再点“打开”。如果系统提示“无法验证开发者”，到 **系统设置 → 隐私与安全性** 页面底部点“仍要打开”。
-   也可以在终端执行：`xattr -dr com.apple.quarantine "/Applications/Stockbee Market Monitor.app"`
-3. 系统要求：macOS 13 及以上；通用二进制，Apple Silicon 和 Intel 都能运行。
+   也可以在终端执行：`xattr -dr com.apple.quarantine "/Applications/Stockbee Market Monitor.app"`；或者双击源码包里的 `install.command` 一键安装（会复制到“应用程序”并去除隔离标记）。
+3. 系统要求：macOS 13 及以上；通用二进制，Apple Silicon 和 Intel 都能运行；窗口最小 990×640。
 
 签名状态：本地 **ad-hoc 签名**，**没有** Apple Developer ID 签名，也**没有**公证（notarization）。所以只适合本机或自己的电脑使用，不适合公开分发。
 

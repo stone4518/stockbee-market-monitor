@@ -13,7 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Window("Stockbee Market Monitor", id: "main") {
             DashboardView()
                 .environmentObject(model)
-                .frame(minWidth: 1120, minHeight: 720)
+                .frame(minWidth: 990, minHeight: 640)
                 .task { await SnapshotRunner.runIfRequested(model) }
         }
         .defaultSize(width: 1480, height: 980)
@@ -33,8 +33,8 @@ struct FullDashboard: View {
         VStack(spacing: 0) {
             HeaderBar()
             HStack(alignment: .top, spacing: 14) {
-                LeftPanel().frame(minWidth: 520, maxWidth: .infinity)
-                RightPanel().frame(minWidth: 520, maxWidth: .infinity)
+                LeftPanel().frame(minWidth: 470, maxWidth: .infinity)
+                RightPanel().frame(minWidth: 470, maxWidth: .infinity)
             }
             .padding(14)
             StatusBar()

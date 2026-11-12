@@ -23,8 +23,8 @@ struct DashboardView: View {
             HeaderBar()
             ScrollView {
                 HStack(alignment: .top, spacing: 14) {
-                    LeftPanel().frame(minWidth: 520, maxWidth: .infinity)
-                    RightPanel().frame(minWidth: 520, maxWidth: .infinity)
+                    LeftPanel().frame(minWidth: 470, maxWidth: .infinity)
+                    RightPanel().frame(minWidth: 470, maxWidth: .infinity)
                 }
                 .padding(14)
             }
@@ -117,7 +117,7 @@ struct LeftPanel: View {
             SectionCard(title: "近10交易日 4% Up / Down", symbol: "chart.xyaxis.line") {
                 TrendChart(days: Array((model.snapshot?.rows.prefix(10) ?? []).reversed()))
                 Text("3D/5D/10D Ratio = 最近 N 个交易日 4% Up 合计 ÷ 4% Down 合计；已用官方表格 226 个交易日逐行核对 5D/10D 定义。")
-                    .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
@@ -241,7 +241,7 @@ struct RightPanel: View {
                 NoticeList(title: "阻止完整评分的原因", lines: a.total == nil ? a.blockers : [], tint: Palette.negative, icon: "xmark.octagon")
                 NoticeList(title: "数据提示", lines: model.warnings, tint: Palette.amber, icon: "exclamationmark.triangle")
                 Text("\(Scorer.ruleVersion)。本模型为自定义交易环境过滤器，非 Stockbee 官方评级，未经历史回测；缺失数据记 N/A，不按 0 分；仅反映市场环境，不是个股买卖建议。")
-                    .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+                    .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
