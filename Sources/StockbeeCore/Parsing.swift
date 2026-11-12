@@ -126,34 +126,50 @@ public enum TabularParser {
 
 public enum GoogleSheetDiscovery {
     public static let officialPage = "https://stockbee.blogspot.com/p/mm.html"
+    /// 同时识别旧版 `docs.google.com/spreadsheet/pub?key=…`（Stockbee 官网当前实际嵌入的形式，2026-11 实测）
+    /// 与新版 `docs.google.com/spreadsheets/d/…` 地址。
     public static func sheetLinks(html: String) -> [String] {
         let s = TabularParser.htmlUnescape(html)
         var links: [String] = []
-        for p in [#"(?:src|href)\s*=\s*['\"](https?://[^'\"]+)['\"]"#, #"(https?://docs\.google\.com/spreadsheets/[^\s\"'<>]+)"#] {
-            for found in TabularParser.extractMatches(s, pattern: p) {
-                if found.count > 1 && found[1].contains("docs.google.com/spreadsheets/") { links.append(found[1]) }
+        for p in [#"(?:src|href|content)\s*=\s*['\"](https?://docs\.google\.com/spreadsheets?/[^'\"]+)['\"]"#, #"(https?://docs\.google\.com/spreadsheets?/[^\s\"'<>\\]+)"#] {
+            for found in TabularParser.extractMatches(s, pattern: p) where found.count > 1 {
+                links.append(found[1].replacingOccurrences(of: "http://", with: "https://"))
             }
         }
         var seen = Set<String>()
         return links.filter { link in
-            let key = String(link.split(separator: "?").first ?? Substring(link))
-            if seen.contains(key) { return false }
+            guard let key = identity(link), !seen.contains(key) else { return false }
             seen.insert(key); return true
         }
     }
+    /// 去重用的表格身份：旧版用 key，新版用文档 ID，再加 gid。
+    static func identity(_ link: String) -> String? {
+        guard let u = URLComponents(string: link) else { return nil }
+        let items = u.queryItems ?? []
+        let gid = items.first(where: { $0.name == "gid" })?.value ?? ""
+        if let key = items.first(where: { $0.name == "key" })?.value { return "key:" + key + "#" + gid }
+        if let r = u.path.range(of: #"/spreadsheets/d/(e/)?[^/]+"#, options: .regularExpression) { return String(u.path[r]) + "#" + gid }
+        return nil
+    }
     public static func csvURLs(_ original: String) -> [URL] {
-        guard let u = URL(string: original), u.host == "docs.google.com", u.path.contains("/spreadsheets/") else { return [] }
-        let query = URLComponents(url: u, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        guard let comps = URLComponents(string: original), comps.host == "docs.google.com" else { return [] }
+        let path = comps.path
+        let query = comps.queryItems ?? []
         let gid = query.first(where: { $0.name == "gid" })?.value
+        let gidPart = gid.map { "&gid=" + $0 } ?? ""
         let base = "https://docs.google.com"
         var result = [String]()
-        if let span = u.path.range(of: #"/spreadsheets/d/e/[^/]+"#, options: .regularExpression) {
-            let path = String(u.path[span]); result += [base+path+"/pub?output=csv"+(gid.map { "&gid="+$0 } ?? "")]
-        }
-        if let span = u.path.range(of: #"/spreadsheets/d/[^/]+"#, options: .regularExpression), !u.path.contains("/d/e/") {
-            let path = String(u.path[span]); result += [base+path+"/gviz/tq?tqx=out:csv"+(gid.map { "&gid="+$0 } ?? ""),base+path+"/export?format=csv"+(gid.map { "&gid="+$0 } ?? "")]
-        }
+        if path.hasPrefix("/spreadsheet/"), let key = query.first(where: { $0.name == "key" })?.value {
+            // 旧版发布地址：Google 会 302 到新版 /spreadsheets/d/<id>/pub。
+            result.append(base + "/spreadsheet/pub?key=" + key + "&output=csv" + gidPart)
+        } else if let span = path.range(of: #"/spreadsheets/d/e/[^/]+"#, options: .regularExpression) {
+            result.append(base + String(path[span]) + "/pub?output=csv" + gidPart)
+        } else if let span = path.range(of: #"/spreadsheets/d/[^/]+"#, options: .regularExpression) {
+            let p = String(path[span])
+            result += [base + p + "/pub?output=csv" + gidPart, base + p + "/gviz/tq?tqx=out:csv" + gidPart, base + p + "/export?format=csv" + gidPart]
+        } else { return [] }
         result.append(original)
-        return result.compactMap(URL.init(string:))
+        var seen = Set<String>()
+        return result.filter { seen.insert($0).inserted }.compactMap(URL.init(string:))
     }
 }
