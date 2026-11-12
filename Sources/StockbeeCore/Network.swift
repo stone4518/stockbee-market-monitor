@@ -35,13 +35,36 @@ public enum DataFetcher {
 
     // MARK: Stockbee 官方
 
-    public static func fetchOfficial(manualSheet: String? = nil) async throws -> BreadthSnapshot {
+    /// - Parameter knownLinks: 以前从官网页面成功发现过的表格地址（App 会持久化），官网页面暂不可达时使用。
+    public static func fetchOfficial(manualSheet: String? = nil, knownLinks: [String] = []) async throws -> BreadthSnapshot {
         let manual = (manualSheet ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        var links: [String]
+        var links: [String] = []
+        var discovered: [String]? = nil
+        var note: String? = nil
         if !manual.isEmpty { links = [manual] }
         else {
-            let html = try await get(URL(string: GoogleSheetDiscovery.officialPage)!)
-            links = GoogleSheetDiscovery.sheetLinks(html: html)
+            var pageError: Error? = nil
+            for attempt in 0..<2 {
+                do {
+                    let html = try await get(URL(string: GoogleSheetDiscovery.officialPage)!)
+                    links = GoogleSheetDiscovery.sheetLinks(html: html)
+                    discovered = links
+                    pageError = nil
+                    break
+                } catch {
+                    pageError = error
+                    if attempt == 0 { try? await Task.sleep(nanoseconds: 3_000_000_000) }
+                }
+            }
+            if let pageError {
+                if !knownLinks.isEmpty {
+                    links = knownLinks
+                    note = "官网 MM 页面暂不可达（\(pageError.localizedDescription)），改用此前从官网发现的表格地址"
+                } else {
+                    links = [GoogleSheetDiscovery.lastVerifiedEmbed]
+                    note = "官网 MM 页面暂不可达（\(pageError.localizedDescription)），改用 \(GoogleSheetDiscovery.lastVerifiedDate) 核实的官网嵌入表格地址"
+                }
+            }
         }
         guard !links.isEmpty else { throw MonitorError.missingData("官网页面未解析到 Google Sheets 嵌入地址（页面结构可能已变化）。可在设置中粘贴官方表格链接。") }
         var details: [String] = []
@@ -54,14 +77,15 @@ public enum DataFetcher {
                     for table in tables {
                         if let rows = try? TabularParser.breadth(table) {
                             return BreadthSnapshot(sourceName: manual.isEmpty ? "Stockbee 官网嵌入的 Google Sheet" : "用户提供的 Google Sheet（官方关联未核验）",
-                                                   sourceURL: url.absoluteString, official: manual.isEmpty, rows: rows)
+                                                   sourceURL: url.absoluteString, official: manual.isEmpty, rows: rows,
+                                                   discoveredLinks: discovered, note: note)
                         }
                     }
                     details.append("\(url.host ?? "?")：未找到含日期/4% Up/Down/Quarter Up/Down 列的表")
                 } catch { details.append(error.localizedDescription) }
             }
         }
-        throw MonitorError.missingData("官方数据读取失败：" + details.prefix(3).joined(separator: "；"))
+        throw MonitorError.missingData("官方数据读取失败：" + (note.map { [$0] } ?? []).joined() + details.prefix(3).joined(separator: "；"))
     }
 
     /// 可选的非官方独立复算源。永远标注为非官方，不会自动替代官方数据。

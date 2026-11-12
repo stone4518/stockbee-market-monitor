@@ -84,12 +84,17 @@ struct CachedState: Codable {
         do {
             let data: BreadthSnapshot
             if sourceMode == "thirdparty" { data = try await DataFetcher.fetchThirdParty() }
-            else { data = try await DataFetcher.fetchOfficial(manualSheet: manualSheetURL) }
+            else {
+                let known = UserDefaults.standard.stringArray(forKey: "discoveredSheetLinks") ?? []
+                data = try await DataFetcher.fetchOfficial(manualSheet: manualSheetURL, knownLinks: known)
+                if let found = data.discoveredLinks, !found.isEmpty { UserDefaults.standard.set(found, forKey: "discoveredSheetLinks") }
+            }
             guard let day = data.latest else { throw MonitorError.missingData("数据源没有有效交易日") }
             let fresh = Freshness.evaluate(dataDate: day.date)
             if fresh == .future { throw MonitorError.invalidData("数据源最新日期 \(day.date) 晚于最近收盘交易日，已拒绝") }
 
             var notes: [String] = data.ratioConsistency()
+            if let n = data.note { notes.insert(n, at: 0) }
             if !TradingCalendar.isTradingDay(day.date) { notes.append("最新日期 \(day.date) 不是 NYSE 交易日，请核对") }
             if !data.official { notes.append("当前为非官方/未核验数据源：\(data.sourceName)") }
 

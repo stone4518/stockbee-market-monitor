@@ -44,8 +44,12 @@ public struct BreadthSnapshot: Codable {
     public var official: Bool
     public var rows: [BreadthDay] // 按交易日降序（最新在前）
     public var fetchedAt: Date
-    public init(sourceName: String, sourceURL: String, official: Bool, rows: [BreadthDay], fetchedAt: Date = Date()) {
+    public var discoveredLinks: [String]?   // 本次从官网页面发现的表格地址
+    public var note: String?                // 取数过程说明（如官网页面暂不可达而使用已知地址）
+    public init(sourceName: String, sourceURL: String, official: Bool, rows: [BreadthDay], fetchedAt: Date = Date(),
+                discoveredLinks: [String]? = nil, note: String? = nil) {
         self.sourceName = sourceName; self.sourceURL = sourceURL; self.official = official; self.rows = rows; self.fetchedAt = fetchedAt
+        self.discoveredLinks = discoveredLinks; self.note = note
     }
     public var latest: BreadthDay? { rows.first }
 

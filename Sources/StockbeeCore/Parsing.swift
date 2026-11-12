@@ -133,6 +133,10 @@ public enum TabularParser {
 
 public enum GoogleSheetDiscovery {
     public static let officialPage = "https://stockbee.blogspot.com/p/mm.html"
+    /// 2026-11-12 实际从官网 MM 页面 iframe 读到的嵌入地址。仅当官网页面本身暂不可达（如 HTTP 429）且本机没有更新的发现记录时作为后备，
+    /// 并在界面明确标注；数据仍来自该官方表格本身。
+    public static let lastVerifiedEmbed = "https://docs.google.com/spreadsheet/pub?key=0Am_cU8NLIU20dEhiQnVHN3Nnc3B1S3J6eGhKZFo0N3c&output=html&widget=true"
+    public static let lastVerifiedDate = "2026-11-12"
     /// 同时识别旧版 `docs.google.com/spreadsheet/pub?key=…`（Stockbee 官网当前实际嵌入的形式，2026-11 实测）
     /// 与新版 `docs.google.com/spreadsheets/d/…` 地址。
     public static func sheetLinks(html: String) -> [String] {

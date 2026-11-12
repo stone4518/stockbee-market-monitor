@@ -51,7 +51,7 @@ struct HeaderBar: View {
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 2) {
                 Text("最新已发布交易日（美东）：\(model.latestDate)").font(.subheadline.weight(.semibold))
-                Text("上次检查 \(time(model.lastCheck)) · 上次成功 \(time(model.lastSuccess))")
+                Text("上次检查 \(time(model.lastCheck)) · " + (model.isCache ? "缓存保存于 \(time(model.cacheSavedAt))" : "上次成功 \(time(model.lastSuccess))"))
                     .font(.caption).foregroundStyle(.secondary)
             }
             Button { Task { await model.refresh() } } label: {
@@ -140,9 +140,9 @@ struct LeftPanel: View {
                          state: st(l?.t2108, 50, 70), note: "高于40日均线占比"),
             IndicatorRow(name: "Quarter Up / Down", value: l.map { "\($0.quarterUp) / \($0.quarterDown)" } ?? "N/A", normal: "Up>Down", ideal: "—",
                          state: l.map { $0.quarterUp > $0.quarterDown ? "正常" : "偏弱" } ?? "N/A", note: l?.universe.map { "股票池 \($0)" } ?? ""),
-            IndicatorRow(name: "SPY/QQQ 趋势", value: a.items[4].value, normal: "MA20/50上方", ideal: "25/25",
+            IndicatorRow(name: "SPY/QQQ 趋势", value: a.items[4].value, normal: "站上MA20/50", ideal: "25/25",
                          state: a.items[4].score.map { "\($0)/25" } ?? "N/A", note: model.quoteVendor ?? "行情不可用"),
-            IndicatorRow(name: "XLK/SMH/XLY 领导力", value: a.items[6].value, normal: "相对SPY走强", ideal: "10/10",
+            IndicatorRow(name: "XLK/SMH/XLY 领导力", value: a.items[6].value, normal: "跑赢SPY", ideal: "10/10",
                          state: a.items[6].score.map { "\($0)/10" } ?? "N/A", note: "20日相对强度")
         ]
     }
@@ -175,8 +175,8 @@ struct IndicatorTable: View {
             ForEach(rows) { r in
                 HStack(spacing: 6) {
                     Text(r.name).font(.system(size: 12.5, weight: .medium)).frame(maxWidth: .infinity, alignment: .leading)
-                    Text(r.value).font(.system(size: 12, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.6).frame(width: 150, alignment: .leading)
-                    Text(r.normal).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7).frame(width: 78, alignment: .leading)
+                    Text(r.value).font(.system(size: 12.5).monospacedDigit()).lineLimit(1).truncationMode(.tail).frame(width: 150, alignment: .leading)
+                    Text(r.normal).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1).frame(width: 78, alignment: .leading)
                     Text(r.ideal).font(.system(size: 12)).foregroundStyle(.secondary).frame(width: 70, alignment: .leading)
                     Text(r.state).font(.system(size: 12, weight: .bold)).foregroundStyle(color(r.state)).frame(width: 48, alignment: .leading)
                 }
@@ -261,7 +261,7 @@ struct ScoreTable: View {
             ForEach(a.items) { item in
                 HStack(spacing: 6) {
                     Text(item.name).font(.system(size: 12.5)).frame(maxWidth: .infinity, alignment: .leading)
-                    Text(item.value).font(.system(size: 12, design: .monospaced)).lineLimit(1).minimumScaleFactor(0.6).frame(width: 170, alignment: .leading)
+                    Text(item.value).font(.system(size: 12.5).monospacedDigit()).lineLimit(1).truncationMode(.tail).frame(width: 170, alignment: .leading)
                     Text("\(item.maxScore)").font(.system(size: 12.5)).frame(width: 40, alignment: .trailing)
                     Text(item.score.map { "\($0)" } ?? "N/A").font(.system(size: 12.5, weight: .bold))
                         .foregroundStyle(item.score == nil ? Palette.amber : Color.primary).frame(width: 56, alignment: .trailing)
