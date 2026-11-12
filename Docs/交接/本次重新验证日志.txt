@@ -1,0 +1,69 @@
+COMMAND: swift test -j 2
+WORKDIR: StockbeeMac
+ENVIRONMENT: Linux Swift 6.2.1
+EXIT: 0
+
+Building for debugging...
+[0/14] Copying sample.csv
+[1/14] Write sources
+[3/14] Write swift-version--1BA0962812E73E12.txt
+[5/17] Emitting module StockbeeCore
+[6/17] Compiling StockbeeCore Core.swift
+[7/17] Compiling StockbeeCore Network.swift
+[8/18] Compiling StockbeeCore Parsing.swift
+[9/19] Wrapping AST for StockbeeCore for debugging
+[11/21] Emitting module StockbeeCoreTests
+[12/21] Compiling StockbeeCoreTests CoreTests.swift
+[13/22] Compiling StockbeeCoreTests resource_bundle_accessor.swift
+[14/23] /mnt/data/Stockbee_Claude_Handoff_2026-11-12/StockbeeMac/.build/x86_64-unknown-linux-gnu/debug/StockbeeMacPackageDiscoveredTests.derived/all-discovered-tests.swift
+[15/23] Write sources
+[16/23] Wrapping AST for StockbeeCoreTests for debugging
+[18/25] Emitting module StockbeeMacPackageDiscoveredTests
+[19/25] Compiling StockbeeMacPackageDiscoveredTests StockbeeCoreTests.swift
+[20/26] Compiling StockbeeMacPackageDiscoveredTests all-discovered-tests.swift
+[21/27] /mnt/data/Stockbee_Claude_Handoff_2026-11-12/StockbeeMac/.build/x86_64-unknown-linux-gnu/debug/StockbeeMacPackageTests.derived/runner.swift
+[22/27] Write sources
+[23/27] Wrapping AST for StockbeeMacPackageDiscoveredTests for debugging
+[25/29] Emitting module StockbeeMacPackageTests
+[26/29] Compiling StockbeeMacPackageTests runner.swift
+[27/30] Wrapping AST for StockbeeMacPackageTests for debugging
+[28/30] Write Objects.LinkFileList
+[29/30] Linking StockbeeMacPackageTests.xctest
+Build complete! (8.84s)
+Test Suite 'All tests' started at 2026-11-12 09:25:52.418
+Test Suite 'debug.xctest' started at 2026-11-12 09:25:52.420
+Test Suite 'CoreTests' started at 2026-11-12 09:25:52.420
+Test Case 'CoreTests.testBadT2108Rejected' started at 2026-11-12 09:25:52.420
+Test Case 'CoreTests.testBadT2108Rejected' passed (0.005 seconds)
+Test Case 'CoreTests.testCSV' started at 2026-11-12 09:25:52.424
+Test Case 'CoreTests.testCSV' passed (0.0 seconds)
+Test Case 'CoreTests.testDifferentDatesNeverCreateFullScore' started at 2026-11-12 09:25:52.425
+Test Case 'CoreTests.testDifferentDatesNeverCreateFullScore' passed (0.01 seconds)
+Test Case 'CoreTests.testFullScoreAndRange' started at 2026-11-12 09:25:52.435
+Test Case 'CoreTests.testFullScoreAndRange' passed (0.026 seconds)
+Test Case 'CoreTests.testHTMLTableParsing' started at 2026-11-12 09:25:52.462
+Test Case 'CoreTests.testHTMLTableParsing' passed (0.001 seconds)
+Test Case 'CoreTests.testHeaderSplitAcrossRows' started at 2026-11-12 09:25:52.463
+Test Case 'CoreTests.testHeaderSplitAcrossRows' passed (0.001 seconds)
+Test Case 'CoreTests.testIncompleteScoreIsNeverAFullScore' started at 2026-11-12 09:25:52.464
+Test Case 'CoreTests.testIncompleteScoreIsNeverAFullScore' passed (0.009 seconds)
+Test Case 'CoreTests.testMissingRows' started at 2026-11-12 09:25:52.473
+Test Case 'CoreTests.testMissingRows' passed (0.01 seconds)
+Test Case 'CoreTests.testNoGuessingWithoutHeaders' started at 2026-11-12 09:25:52.483
+Test Case 'CoreTests.testNoGuessingWithoutHeaders' passed (0.1 seconds)
+Test Case 'CoreTests.testParsesMarketRow' started at 2026-11-12 09:25:52.583
+Test Case 'CoreTests.testParsesMarketRow' passed (0.012 seconds)
+Test Case 'CoreTests.testQuoteAsOfDateAndRelativeStrength' started at 2026-11-12 09:25:52.595
+Test Case 'CoreTests.testQuoteAsOfDateAndRelativeStrength' passed (0.0 seconds)
+Test Case 'CoreTests.testSheetDiscovery' started at 2026-11-12 09:25:52.595
+Test Case 'CoreTests.testSheetDiscovery' passed (0.001 seconds)
+Test Suite 'CoreTests' passed at 2026-11-12 09:25:52.596
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.176 (0.176) seconds
+Test Suite 'debug.xctest' passed at 2026-11-12 09:25:52.596
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.176 (0.176) seconds
+Test Suite 'All tests' passed at 2026-11-12 09:25:52.596
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.176 (0.176) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.2.1 (c9d57c83568b06d)
+↳ Target Platform: x86_64-unknown-linux-gnu
+✔ Test run with 0 tests in 0 suites passed after 0.001 seconds.

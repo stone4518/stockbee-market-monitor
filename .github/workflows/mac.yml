@@ -1,0 +1,30 @@
+name: macOS build & live verification
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  mac:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: 环境信息
+        run: |
+          mkdir -p artifacts
+          { sw_vers; uname -m; xcodebuild -version; swift --version; } 2>&1 | tee artifacts/env.txt
+      - name: 抓取官方原始数据
+        run: bash scripts/fetch-raw.sh artifacts/raw
+      - name: 单元测试
+        run: swift test -j 2 2>&1 | tee artifacts/swift-test.log; exit ${PIPESTATUS[0]}
+      - name: 构建 .app
+        if: always()
+        run: bash build-mac.command 2>&1 | tee artifacts/build.log; exit ${PIPESTATUS[0]}
+      - name: 上传产物
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-build-${{ github.run_number }}
+          path: |
+            artifacts/
+            dist/*.zip
+            dist/*.dmg

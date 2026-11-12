@@ -1,0 +1,45 @@
+Building for debugging...
+[0/3] Write sources
+[1/3] Write swift-version--1BA0962812E73E12.txt
+[3/5] Compiling StockbeeCore Network.swift
+[4/5] Emitting module StockbeeCore
+[5/7] Write Objects.LinkFileList
+[6/7] Linking StockbeeMacPackageTests.xctest
+Build complete! (0.95s)
+Test Suite 'All tests' started at 2026-11-12 08:59:57.087
+Test Suite 'debug.xctest' started at 2026-11-12 08:59:57.088
+Test Suite 'CoreTests' started at 2026-11-12 08:59:57.088
+Test Case 'CoreTests.testBadT2108Rejected' started at 2026-11-12 08:59:57.088
+Test Case 'CoreTests.testBadT2108Rejected' passed (0.004 seconds)
+Test Case 'CoreTests.testCSV' started at 2026-11-12 08:59:57.093
+Test Case 'CoreTests.testCSV' passed (0.0 seconds)
+Test Case 'CoreTests.testDifferentDatesNeverCreateFullScore' started at 2026-11-12 08:59:57.093
+Test Case 'CoreTests.testDifferentDatesNeverCreateFullScore' passed (0.012 seconds)
+Test Case 'CoreTests.testFullScoreAndRange' started at 2026-11-12 08:59:57.105
+Test Case 'CoreTests.testFullScoreAndRange' passed (0.127 seconds)
+Test Case 'CoreTests.testHTMLTableParsing' started at 2026-11-12 08:59:57.232
+Test Case 'CoreTests.testHTMLTableParsing' passed (0.002 seconds)
+Test Case 'CoreTests.testHeaderSplitAcrossRows' started at 2026-11-12 08:59:57.234
+Test Case 'CoreTests.testHeaderSplitAcrossRows' passed (0.001 seconds)
+Test Case 'CoreTests.testIncompleteScoreIsNeverAFullScore' started at 2026-11-12 08:59:57.235
+Test Case 'CoreTests.testIncompleteScoreIsNeverAFullScore' passed (0.011 seconds)
+Test Case 'CoreTests.testMissingRows' started at 2026-11-12 08:59:57.245
+Test Case 'CoreTests.testMissingRows' passed (0.011 seconds)
+Test Case 'CoreTests.testNoGuessingWithoutHeaders' started at 2026-11-12 08:59:57.256
+Test Case 'CoreTests.testNoGuessingWithoutHeaders' passed (0.0 seconds)
+Test Case 'CoreTests.testParsesMarketRow' started at 2026-11-12 08:59:57.257
+Test Case 'CoreTests.testParsesMarketRow' passed (0.01 seconds)
+Test Case 'CoreTests.testQuoteAsOfDateAndRelativeStrength' started at 2026-11-12 08:59:57.267
+Test Case 'CoreTests.testQuoteAsOfDateAndRelativeStrength' passed (0.0 seconds)
+Test Case 'CoreTests.testSheetDiscovery' started at 2026-11-12 08:59:57.268
+Test Case 'CoreTests.testSheetDiscovery' passed (0.001 seconds)
+Test Suite 'CoreTests' passed at 2026-11-12 08:59:57.268
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.18 (0.18) seconds
+Test Suite 'debug.xctest' passed at 2026-11-12 08:59:57.268
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.18 (0.18) seconds
+Test Suite 'All tests' passed at 2026-11-12 08:59:57.268
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.18 (0.18) seconds
+◇ Test run started.
+↳ Testing Library Version: 6.2.1 (c9d57c83568b06d)
+↳ Target Platform: x86_64-unknown-linux-gnu
+✔ Test run with 0 tests in 0 suites passed after 0.001 seconds.
