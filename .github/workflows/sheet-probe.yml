@@ -1,0 +1,40 @@
+name: sheet endpoint probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: fetch all variants
+        run: |
+          mkdir -p /tmp/p && cd /tmp/p
+          UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+          K=0Am_cU8NLIU20dEhiQnVHN3Nnc3B1S3J6eGhKZFo0N3c; N=1O6OhS7ciA8zwfycBfGPbP2fWJnR0pn2UUvFZVDP9jpE
+          f(){ curl -sS -L -m 40 -A "$UA" -o "$1" -w "$1 http=%{http_code} bytes=%{size_download}\n" "$2"; }
+          date -u
+          f old_widget.html "https://docs.google.com/spreadsheet/pub?key=$K&output=html&widget=true"
+          f old_csv.csv "https://docs.google.com/spreadsheet/pub?key=$K&output=csv"
+          f new_pub_csv.csv "https://docs.google.com/spreadsheets/d/$N/pub?output=csv"
+          f new_pub_csv_gid0.csv "https://docs.google.com/spreadsheets/d/$N/pub?gid=0&single=true&output=csv"
+          f new_pubhtml.html "https://docs.google.com/spreadsheets/d/$N/pubhtml"
+          f new_pubhtml_widget.html "https://docs.google.com/spreadsheets/d/$N/pubhtml?widget=true&headers=false"
+          f gviz.csv "https://docs.google.com/spreadsheets/d/$N/gviz/tq?tqx=out:csv"
+          f export.csv "https://docs.google.com/spreadsheets/d/$N/export?format=csv"
+          f mm.html "https://stockbee.blogspot.com/p/mm.html"
+          for x in *.csv; do echo "== $x"; grep -m2 '11/1[01]/2026' "$x" || head -c 300 "$x"; echo; done
+          for x in *.html; do echo "== $x"; python3 - "$x" <<'PY'
+          import re,sys,html
+          s=open(sys.argv[1],encoding='utf-8',errors='replace').read()
+          print('tables',len(re.findall(r'<table',s)),'sheet tabs',len(re.findall(r'sheet-button-',s)))
+          for m in re.finditer(r'11/1[01]/2026',s):
+              seg=s[m.start():m.start()+1500]
+              cells=[html.unescape(re.sub('<[^>]+>','',c)).strip() for c in re.findall(r'<td[^>]*>(.*?)</td>',seg)]
+              print(m.group(0),cells[:8]); 
+          names=re.findall(r'<li id="sheet-button-(\d+)"[^>]*><a[^>]*>([^<]*)</a>',s)
+          print('tabs:',names[:40])
+          PY
+          done
+          mkdir -p /tmp/out && cp -r /tmp/p/* /tmp/out/
+          cd /tmp/out && git init -q -b sheet-probe && git add -A && git -c user.name=ci -c user.email=ci@localhost commit -qm probe && git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" sheet-probe
