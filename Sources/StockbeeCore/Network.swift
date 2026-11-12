@@ -12,6 +12,10 @@ public enum DataFetcher {
     static var forcedOffline: Bool { ProcessInfo.processInfo.environment["STOCKBEE_FORCE_OFFLINE"] == "1" }
 
     public static func get(_ url: URL, headers: [String: String] = [:], timeout: TimeInterval = 20) async throws -> String {
+        try await getFinal(url, headers: headers, timeout: timeout).0
+    }
+    /// 同 get，另返回跟随重定向后的最终 URL。
+    public static func getFinal(_ url: URL, headers: [String: String] = [:], timeout: TimeInterval = 20) async throws -> (String, URL) {
         guard url.scheme == "https" else { throw MonitorError.unsupportedSource("仅允许 HTTPS 数据源") }
         if forcedOffline { throw MonitorError.missingData("网络不可用（STOCKBEE_FORCE_OFFLINE 测试模式）") }
         var req = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
@@ -30,7 +34,7 @@ public enum DataFetcher {
         }
         guard data.count < 10_000_000, let str = String(data: data, encoding: .utf8) else { throw MonitorError.invalidData("数据过大或编码不可解析") }
         guard !str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw MonitorError.missingData("\(url.host ?? "?") 返回空内容") }
-        return str
+        return (str, r.url ?? url)
     }
 
     // MARK: Stockbee 官方
@@ -67,26 +71,71 @@ public enum DataFetcher {
             }
         }
         guard !links.isEmpty else { throw MonitorError.missingData("官网页面未解析到 Google Sheets 嵌入地址（页面结构可能已变化）。可在设置中粘贴官方表格链接。") }
+        let name = manual.isEmpty ? "Stockbee 官网嵌入的 Google Sheet" : "用户提供的 Google Sheet（官方关联未核验）"
         var details: [String] = []
         for link in links {
-            for url in GoogleSheetDiscovery.csvURLs(link) {
-                do {
-                    let contents = try await get(url)
-                    let tables: [[[String]]] = (contents.lowercased().contains("<html") || contents.contains("<table"))
-                        ? TabularParser.htmlTables(contents) : [TabularParser.csv(contents)]
-                    for table in tables {
-                        if let rows = try? TabularParser.breadth(table) {
-                            return BreadthSnapshot(sourceName: manual.isEmpty ? "Stockbee 官网嵌入的 Google Sheet" : "用户提供的 Google Sheet（官方关联未核验）",
-                                                   sourceURL: url.absoluteString, official: manual.isEmpty, rows: rows,
-                                                   discoveredLinks: discovered, note: note)
-                        }
-                    }
-                    details.append("\(url.host ?? "?")：未找到含日期/4% Up/Down/Quarter Up/Down 列的表")
-                } catch { details.append(error.localizedDescription) }
+            // 两个渠道并行：发布版（Publish to web 的 CSV，有缓存）与实时版（gviz 直接读表格当前内容）。
+            async let publishedTask = fetchPublished(link)
+            async let liveTask = fetchLive(link)
+            let published = await publishedTask
+            let live = await liveTask
+            var notes: [String] = note.map { [$0] } ?? []
+            let chosen: (rows: [BreadthDay], url: String)
+            let channel: String
+            var revision: String? = nil
+            switch (live, published) {
+            case (.success(let l), .success(var p)):
+                // 验收用：STOCKBEE_SIMULATE_REVISION=1 时把发布版最新一行改成 2026-11-12 实际遇到的旧数值，用于截图验证提示
+                if ProcessInfo.processInfo.environment["STOCKBEE_SIMULATE_REVISION"] == "1", !p.rows.isEmpty {
+                    p.rows[0].up4 -= 7; p.rows[0].down4 -= 2; p.rows[0].quarterUp -= 1; p.rows[0].quarterDown -= 4
+                }
+                chosen = l; channel = "实时版（与发布版交叉核对）"
+                let diffs = ChannelCompare.differences(live: l.rows, published: p.rows)
+                if !diffs.isEmpty { revision = "官方数据正在修订：实时版与发布版不一致（已采用实时版）。" + diffs.joined(separator: "；") }
+            case (.success(let l), .failure(let e)):
+                chosen = l; channel = "实时版（发布版不可用）"; notes.append("发布版渠道不可用：\(e.localizedDescription)")
+            case (.failure(let e), .success(let p)):
+                chosen = p; channel = "发布版（实时渠道不可用）"; notes.append("实时渠道不可用，改用发布版（可能有缓存延迟）：\(e.localizedDescription)")
+            case (.failure(let le), .failure(let pe)):
+                details.append("实时：\(le.localizedDescription)"); details.append("发布版：\(pe.localizedDescription)")
+                continue
             }
+            return BreadthSnapshot(sourceName: name, sourceURL: chosen.url, official: manual.isEmpty, rows: chosen.rows,
+                                   discoveredLinks: discovered, note: notes.isEmpty ? nil : notes.joined(separator: "；"),
+                                   channel: channel, revisionNotice: revision)
         }
         let first = details.first ?? "未知错误"
         throw MonitorError.missingData(note == nil ? "官方数据读取失败：\(first)" : "官网页面与官方表格均无法访问：\(first)")
+    }
+
+    static func parseBreadth(_ contents: String) throws -> [BreadthDay] {
+        let tables: [[[String]]] = (contents.lowercased().contains("<html") || contents.contains("<table"))
+            ? TabularParser.htmlTables(contents) : [TabularParser.csv(contents)]
+        var best: [BreadthDay] = []
+        for t in tables { if let rows = try? TabularParser.breadth(t), (rows.first?.date ?? "") > (best.first?.date ?? "") || rows.count > best.count && rows.first?.date == best.first?.date { best = rows } }
+        guard !best.isEmpty else { throw MonitorError.invalidData("未找到含日期/4% Up/Down/Quarter Up/Down 列的表") }
+        return best
+    }
+    /// 发布版：Publish to web 输出的 CSV（官网 iframe 所用渠道，Google 会缓存）。
+    static func fetchPublished(_ link: String) async -> Result<(rows: [BreadthDay], url: String), Error> {
+        var last: Error = MonitorError.missingData("无可用的发布版地址")
+        for url in GoogleSheetDiscovery.csvURLs(link) where !url.absoluteString.contains("/gviz/") {
+            do { return .success((try parseBreadth(try await get(url)), url.absoluteString)) } catch { last = error }
+        }
+        return .failure(last)
+    }
+    /// 实时版：gviz 查询接口直接读取表格当前内容（不经过“发布到网络”的缓存）。
+    static func fetchLive(_ link: String) async -> Result<(rows: [BreadthDay], url: String), Error> {
+        do {
+            var id = GoogleSheetDiscovery.documentID(link)
+            if id == nil {   // 旧版 key 地址：跟随重定向得到新版文档 ID
+                let (body, final) = try await getFinal(URL(string: link)!)
+                id = GoogleSheetDiscovery.documentID(final.absoluteString) ?? GoogleSheetDiscovery.documentID(inText: body)
+            }
+            guard let id else { throw MonitorError.missingData("无法确定表格文档 ID，实时渠道不可用") }
+            let url = URL(string: "https://docs.google.com/spreadsheets/d/\(id)/gviz/tq?tqx=out:csv")!
+            return .success((try parseBreadth(try await get(url)), url.absoluteString))
+        } catch { return .failure(error) }
     }
 
     /// 可选的非官方独立复算源。永远标注为非官方，不会自动替代官方数据。

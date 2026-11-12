@@ -162,6 +162,16 @@ public enum GoogleSheetDiscovery {
         if let r = u.path.range(of: #"/spreadsheets/d/(e/)?[^/]+"#, options: .regularExpression) { return String(u.path[r]) + "#" + gid }
         return nil
     }
+    /// 新版可编辑文档 ID（/spreadsheets/d/<id>/，不含仅发布用的 /d/e/）。
+    public static func documentID(_ link: String) -> String? {
+        guard let u = URLComponents(string: link), u.host == "docs.google.com",
+              let r = u.path.range(of: #"^/spreadsheets/d/[A-Za-z0-9_-]{20,}"#, options: .regularExpression) else { return nil }
+        let id = String(u.path[r].dropFirst("/spreadsheets/d/".count))
+        return id == "e" ? nil : id
+    }
+    public static func documentID(inText text: String) -> String? {
+        TabularParser.extractMatches(text, pattern: #"docs\.google\.com/spreadsheets/d/([A-Za-z0-9_-]{20,})"#).first.map { $0[1] }
+    }
     public static func csvURLs(_ original: String) -> [URL] {
         guard let comps = URLComponents(string: original), comps.host == "docs.google.com" else { return [] }
         let path = comps.path

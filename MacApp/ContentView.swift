@@ -61,6 +61,7 @@ struct HeaderBar: View {
             Button { model.showSettings = true } label: { Label("数据来源", systemImage: "gearshape") }
             VStack(alignment: .trailing, spacing: 3) {
                 Badge(text: sourceBadge.0, tint: sourceBadge.1)
+                if model.snapshot?.revisionNotice != nil && !model.isCache { Badge(text: "官方数据正在修订", tint: Palette.negative) }
                 if let f = model.freshness { Badge(text: f.label, tint: f.usableForScoring ? Palette.positive : Palette.negative) }
             }
         }
@@ -96,6 +97,9 @@ struct LeftPanel: View {
     @EnvironmentObject var model: MonitorModel
     var body: some View {
         VStack(spacing: 12) {
+            if let r = model.snapshot?.revisionNotice {
+                RevisionBanner(text: r)
+            }
             SectionCard(title: "当日最新指标", symbol: "chart.bar.fill") {
                 HStack {
                     Label("最新完整交易日（美东）", systemImage: "calendar")
@@ -110,7 +114,7 @@ struct LeftPanel: View {
                 }
                 IndicatorTable(rows: rows)
                 if let s = model.snapshot {
-                    Text("来源：\(s.sourceName) · 抓取 \(s.fetchedAt.formatted(date: .abbreviated, time: .shortened))\(model.quoteVendor.map { " · ETF：\($0)" } ?? "")")
+                    Text("来源：\(s.sourceName)\(s.channel.map { " · \($0)" } ?? "") · 抓取 \(s.fetchedAt.formatted(date: .abbreviated, time: .shortened))\(model.quoteVendor.map { " · ETF：\($0)" } ?? "")")
                         .font(.caption).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
@@ -145,6 +149,24 @@ struct LeftPanel: View {
             IndicatorRow(name: "XLK/SMH/XLY 领导力", value: a.items[6].value, normal: "跑赢SPY", ideal: "10/10",
                          state: a.items[6].score.map { "\($0)/10" } ?? "N/A", note: "20日相对强度")
         ]
+    }
+}
+
+struct RevisionBanner: View {
+    let text: String
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill").font(.title2).foregroundStyle(.white)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("官方数据正在修订").font(.headline).foregroundStyle(.white)
+                Text(text.replacingOccurrences(of: "官方数据正在修订：", with: ""))
+                    .font(.caption).foregroundStyle(.white.opacity(0.95)).fixedSize(horizontal: false, vertical: true)
+                Text("当前显示与评分均采用实时版；官网嵌入页面可能仍显示旧数值，强制刷新（⌘⇧R）后应一致。")
+                    .font(.caption2).foregroundStyle(.white.opacity(0.85)).fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(12).background(Palette.negative, in: RoundedRectangle(cornerRadius: 10))
     }
 }
 
@@ -414,6 +436,8 @@ struct SettingsView: View {
                 TextField("手动指定 Google Sheet 链接（留空=自动发现，推荐）", text: $model.manualSheetURL).textFieldStyle(.roundedBorder)
                 Text("手动链接会被标记为“官方关联未核验”，不发布完整等级。").font(.caption).foregroundStyle(.secondary)
             }
+            Text("官方广度数据每次同时读取两个渠道：实时版（Google 表格当前内容）与发布版（官网嵌入的“发布到网络”版本，可能有缓存）。以实时版为准；两者不一致时提示“官方数据正在修订”。")
+                .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             Text("ETF 行情依次尝试：Yahoo Finance → Nasdaq.com → Cboe 延时行情；同一次评分的 5 只 ETF 必须来自同一家，且必须包含与广度数据同一交易日的收盘价。")
                 .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             Text("本地缓存：~/Library/Application Support/StockbeeMarketMonitor（仅断网时只读查看）").font(.caption).foregroundStyle(.secondary)
@@ -425,7 +449,7 @@ struct SettingsView: View {
                 Button("保存并刷新") { model.saveSettings() }.keyboardShortcut(.defaultAction)
             }
         }
-        .padding(24).frame(width: 640, height: 400)
+        .padding(24).frame(width: 660, height: 460)
     }
 }
 

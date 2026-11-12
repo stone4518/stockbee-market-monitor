@@ -46,10 +46,12 @@ public struct BreadthSnapshot: Codable {
     public var fetchedAt: Date
     public var discoveredLinks: [String]?   // 本次从官网页面发现的表格地址
     public var note: String?                // 取数过程说明（如官网页面暂不可达而使用已知地址）
+    public var channel: String?             // 实际采用的渠道（实时版 / 发布版）
+    public var revisionNotice: String?      // 实时版与发布版不一致时的“官方数据正在修订”提示
     public init(sourceName: String, sourceURL: String, official: Bool, rows: [BreadthDay], fetchedAt: Date = Date(),
-                discoveredLinks: [String]? = nil, note: String? = nil) {
+                discoveredLinks: [String]? = nil, note: String? = nil, channel: String? = nil, revisionNotice: String? = nil) {
         self.sourceName = sourceName; self.sourceURL = sourceURL; self.official = official; self.rows = rows; self.fetchedAt = fetchedAt
-        self.discoveredLinks = discoveredLinks; self.note = note
+        self.discoveredLinks = discoveredLinks; self.note = note; self.channel = channel; self.revisionNotice = revisionNotice
     }
     public var latest: BreadthDay? { rows.first }
 
@@ -87,6 +89,30 @@ public struct BreadthSnapshot: Codable {
             problems.append("10D 官方公布值 \(String(format:"%.2f", rep)) 与日度复算 \(String(format:"%.3f", comp)) 不一致")
         }
         return problems
+    }
+}
+
+// MARK: - 实时版 / 发布版交叉核对
+
+public enum ChannelCompare {
+    /// 比较两个渠道：最新交易日是否相同；最近 10 个交易日 4% Up/Down；最新一行全部字段。返回差异描述（空 = 一致）。
+    public static func differences(live: [BreadthDay], published: [BreadthDay]) -> [String] {
+        guard let l = live.first, let p = published.first else { return [] }
+        var out: [String] = []
+        if l.date != p.date { out.append("最新交易日 实时 \(l.date) / 发布版 \(p.date)") }
+        let pubByDate = Dictionary(published.map { ($0.date, $0) }, uniquingKeysWith: { a, _ in a })
+        for d in live.prefix(10) {
+            guard let q = pubByDate[d.date] else { continue }
+            var f: [String] = []
+            func cmp<T: Equatable>(_ name: String, _ a: T?, _ b: T?) { if a != b { f.append("\(name) \(a.map { "\($0)" } ?? "空")/\(b.map { "\($0)" } ?? "空")") } }
+            cmp("4% Up", d.up4, q.up4); cmp("4% Down", d.down4, q.down4)
+            if d.date == l.date {
+                cmp("Quarter Up", d.quarterUp, q.quarterUp); cmp("Quarter Down", d.quarterDown, q.quarterDown)
+                cmp("T2108", d.t2108, q.t2108); cmp("5D", d.reported5, q.reported5); cmp("10D", d.reported10, q.reported10)
+            }
+            if !f.isEmpty { out.append("\(d.date)：" + f.joined(separator: "，") + "（实时/发布版）") }
+        }
+        return out
     }
 }
 

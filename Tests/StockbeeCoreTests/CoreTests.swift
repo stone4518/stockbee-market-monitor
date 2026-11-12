@@ -176,6 +176,39 @@ final class CoreTests: XCTestCase {
         XCTAssertEqual(GoogleSheetDiscovery.csvURLs(links[0]).first?.absoluteString, "https://docs.google.com/spreadsheets/d/e/2PACX-abc/pub?output=csv&gid=2")
     }
 
+    // MARK: 实时版 / 发布版交叉核对
+
+    func testChannelsIdentical() throws {
+        let rows = try official().rows
+        XCTAssertTrue(ChannelCompare.differences(live: rows, published: rows).isEmpty)
+    }
+    func testChannelRevisionDetected() throws {
+        // 2026-11-12 实际遇到：官网嵌入页面显示 387/127/0.84/976/1337，实时表格为 394/129/0.85/977/1341
+        let live = try official().rows
+        var pub = live
+        pub[0].up4 = 387; pub[0].down4 = 127; pub[0].reported5 = 0.84; pub[0].quarterUp = 976; pub[0].quarterDown = 1337
+        let d = ChannelCompare.differences(live: live, published: pub)
+        XCTAssertEqual(d.count, 1)
+        XCTAssertTrue(d[0].contains("2026-11-11") && d[0].contains("394/387") && d[0].contains("129/127") && d[0].contains("977/976"))
+    }
+    func testChannelPublishLag() throws {
+        let live = try official().rows
+        let pub = Array(live.dropFirst())
+        XCTAssertTrue(ChannelCompare.differences(live: live, published: pub).first!.contains("2026-11-11"))
+    }
+    func testGvizHeaderParses() throws {
+        // gviz 输出把两行表头合并为一行、所有字段加引号（2026-11-12 实测格式）
+        let csv = "\"Date\",\"Primary Breadth Indicators Number of stocks up 4% plus today\",\"Number of stocks down 4% plus today\",\"5 day ratio\",\"10 day  ratio \",\"Number of stocks up 25% plus in a quarter\",\"Number of stocks down 25% + in a quarter\",\"Secondary Breadth Indicators Number of stocks up 25% + in a month\",\"Number of stocks down 25% + in a month\",\"Number of stocks up 50% + in a month\",\"Number of stocks down 50% + in a month\",\"Number of stocks up 13% + in 34 days\",\"Number of stocks down 13% + in 34 days\",\" Worden Common stock universe\",\"T2108 \",\"S&P\"\n\"11/11/2026\",\"394\",\"129\",\"0.85\",\"0.89\",\"977\",\"1341\",\"239\",\"155\",\"49\",\"24\",\"1881\",\"1620\",\"6554\",\"50.77\",\"7,619.38\"\n"
+        let rows = try TabularParser.breadth(TabularParser.csv(csv))
+        XCTAssertEqual(rows.first?.up4, 394); XCTAssertEqual(rows.first?.quarterDown, 1341); XCTAssertEqual(rows.first?.t2108, 50.77)
+    }
+    func testDocumentID() {
+        XCTAssertEqual(GoogleSheetDiscovery.documentID("https://docs.google.com/spreadsheets/d/1O6OhS7ciA8zwfycBfGPbP2fWJnR0pn2UUvFZVDP9jpE/pub?output=html&widget=true"),
+                       "1O6OhS7ciA8zwfycBfGPbP2fWJnR0pn2UUvFZVDP9jpE")
+        XCTAssertNil(GoogleSheetDiscovery.documentID("https://docs.google.com/spreadsheets/d/e/2PACX-1vabcdefghijklmnopqrstuvwxyz/pubhtml"))
+        XCTAssertNil(GoogleSheetDiscovery.documentID(GoogleSheetDiscovery.lastVerifiedEmbed))
+    }
+
     // MARK: 行情解析与完整评分（真实数据）
 
     func testNasdaqParser() throws {

@@ -92,6 +92,7 @@ struct FullDashboard: View {
             "状态：\(model.status)",
             "数据日：\(model.latestDate) · 时效：\(model.freshness?.label ?? "—") · 缓存：\(model.isCache)",
             "行情商：\(model.quoteVendor ?? "无")",
+            "广度渠道：\(model.snapshot?.channel ?? "—") · 修订提示：\(model.snapshot?.revisionNotice ?? "无")",
             "分项：" + a.items.map { "\($0.name)=\($0.score.map { String($0) } ?? "N/A")" }.joined(separator: "；"),
             "总分：\(a.total.map { String($0) } ?? "待评估") · 等级：\(a.grade ?? "待评估") · VCP：\(a.vcp) · HTF：\(a.htf)",
             "阻断：" + a.blockers.joined(separator: "；"),

@@ -17,6 +17,9 @@ do {
     let l = snap.latest!
     let fresh = Freshness.evaluate(dataDate: l.date)
     say("官方数据源：\(snap.sourceName) · \(snap.sourceURL)")
+    say("采用渠道：\(snap.channel ?? "—")")
+    say(snap.revisionNotice ?? "实时版与发布版一致")
+    if let n = snap.note { say("说明：\(n)") }
     say("行数 \(snap.rows.count) · 最新交易日 \(l.date) · 时效：\(fresh.label)")
     say("4% Up \(l.up4) · 4% Down \(l.down4) · Quarter Up \(l.quarterUp) · Quarter Down \(l.quarterDown) · T2108 \(l.t2108.map{String($0)} ?? "N/A") · 股票池 \(l.universe.map{String($0)} ?? "N/A")")
     say("复算 3D \(f(snap.ratio(3))) · 5D \(f(snap.ratio(5)))（官方 \(l.reported5.map{String($0)} ?? "N/A")） · 10D \(f(snap.ratio(10)))（官方 \(l.reported10.map{String($0)} ?? "N/A")） · Quarter \(f(snap.quarterRatio))")
@@ -47,7 +50,7 @@ do {
         "runAtUTC": ISO8601DateFormatter().string(from: started), "source": snap.sourceURL, "latestDate": l.date, "freshness": fresh.label,
         "up4": l.up4, "down4": l.down4, "quarterUp": l.quarterUp, "quarterDown": l.quarterDown, "t2108": l.t2108 as Any,
         "ratio3": snap.ratio(3) as Any, "ratio5": snap.ratio(5) as Any, "ratio10": snap.ratio(10) as Any, "quarterRatio": snap.quarterRatio as Any,
-        "reported5": l.reported5 as Any, "reported10": l.reported10 as Any, "quoteVendor": bundle.vendor?.rawValue as Any,
+        "channel": snap.channel as Any, "revisionNotice": snap.revisionNotice as Any, "reported5": l.reported5 as Any, "reported10": l.reported10 as Any, "quoteVendor": bundle.vendor?.rawValue as Any,
         "items": a.items.map { ["name": $0.name, "score": $0.score as Any, "max": $0.maxScore, "value": $0.value, "detail": $0.detail] },
         "total": a.total as Any, "grade": a.grade as Any, "vcp": a.vcp, "htf": a.htf, "blockers": a.blockers
     ]

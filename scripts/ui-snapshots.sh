@@ -13,6 +13,8 @@ run 00_完整内容_离屏整页 "$APP_BIN" --snapshot "$OUT/00_完整内容_离
 run 02_最小窗口_990x640 "$APP_BIN" --snapshot "$OUT/02_最小窗口_990x640.png" --size 990x640
 run 03_断网_有缓存 env STOCKBEE_FORCE_OFFLINE=1 "$APP_BIN" --snapshot "$OUT/03_断网_有缓存.png" --size 1480x1000
 run 04_断网_无缓存 env STOCKBEE_FORCE_OFFLINE=1 STOCKBEE_NO_CACHE=1 "$APP_BIN" --snapshot "$OUT/04_断网_无缓存.png" --size 1480x1000
+run 06_模拟官方修订 env STOCKBEE_SIMULATE_REVISION=1 "$APP_BIN" --snapshot "$OUT/06_模拟官方修订.png" --size 1480x1000
+run 07_模拟官方修订_整页 env STOCKBEE_SIMULATE_REVISION=1 "$APP_BIN" --snapshot "$OUT/07_模拟官方修订_整页.png" --size 1480x1000 --full
 # 系统级截屏（独立于应用内渲染），验证真实窗口可见
 "$APP_BIN" & PID=$!; sleep 30; screencapture -x "$OUT/05_系统截屏_全屏.png" || echo "screencapture 失败"; kill $PID 2>/dev/null
 ls -la "$OUT"; ls -la "$HOME/Library/Application Support/StockbeeMarketMonitor" || true

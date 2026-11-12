@@ -114,7 +114,8 @@ struct CachedState: Codable {
             let previous = isCache ? nil : snapshot?.latest?.date
             let cachedDate = Self.loadCache()?.snapshot.latest?.date
             let before = previous ?? cachedDate
-            if let before, before == day.date { publishNote = "已检查：Stockbee 尚无新交易日，最新仍为 \(day.date)" }
+            if data.revisionNotice != nil { publishNote = "官方数据正在修订（已采用实时版 \(day.date)）" }
+            else if let before, before == day.date { publishNote = "已检查：Stockbee 尚无新交易日，最新仍为 \(day.date)" }
             else if let before { publishNote = "发现新交易日 \(day.date)（上次 \(before)）" }
             else { publishNote = "已读取最新已发布交易日 \(day.date)" }
 
