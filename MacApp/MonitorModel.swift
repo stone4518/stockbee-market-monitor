@@ -1,90 +1,169 @@
 #if os(macOS)
 import SwiftUI
+import AppKit
 import Foundation
+
+/// 本地只读缓存：最近一次成功抓取的广度与行情。只用于断网时查看，永远不参与完整评分。
+struct CachedState: Codable {
+    var snapshot: BreadthSnapshot
+    var quotes: [String: QuoteHistory]
+    var vendor: String?
+    var savedAt: Date
+}
 
 @MainActor final class MonitorModel: ObservableObject {
     @Published var snapshot: BreadthSnapshot?
     @Published var quotes: [String: QuoteHistory] = [:]
-    @Published var quoteSources: [String:String] = [:]
+    @Published var quoteVendor: String?
+    @Published var quoteRawLatest: [String: String] = [:]
     @Published var sourceMode: String = UserDefaults.standard.string(forKey: "sourceMode") ?? "official"
     @Published var manualSheetURL: String = UserDefaults.standard.string(forKey: "officialSheetURL") ?? ""
     @Published var loading = false
     @Published var lastCheck: Date?
+    @Published var lastSuccess: Date?
     @Published var error: String?
     @Published var warnings: [String] = []
     @Published var showSettings = false
-    var assessment: Assessment { Scorer.assess(snapshot, quotes) }
+    @Published var isCache = false
+    @Published var cacheSavedAt: Date?
+    @Published var publishNote: String?
+    @Published var freshness: Freshness?
+
+    private var timer: Timer?
+    private var wakeObserver: NSObjectProtocol?
+    private(set) var started = false
+    static let interval: TimeInterval = 15 * 60
+
+    var blockers: [String] {
+        var b: [String] = []
+        if isCache { b.append("当前显示的是离线缓存（只读），不发布完整评分") }
+        if let f = freshness, !f.usableForScoring { b.append("广度数据\(f.label)") }
+        if let s = snapshot, !s.official { b.append("数据源不是经官网自动发现的 Stockbee 官方表格") }
+        return b
+    }
+    var assessment: Assessment { Scorer.assess(snapshot, quotes, blockers: blockers) }
     var latestDate: String { snapshot?.latest?.date ?? "—" }
     var status: String {
-        if loading { return "正在更新…" }
-        if let error { return "拉取失败：" + error }
-        if snapshot == nil { return "等待获取正式数据" }
-        return "已读取数据源最近一条收盘数据（不代表当天已更新）"
+        if loading { return "正在联网检查…" }
+        if let error { return (isCache ? "联网失败，显示缓存：" : "联网失败：") + error }
+        if snapshot == nil { return "尚未获取数据" }
+        return publishNote ?? "已更新"
     }
+
+    // MARK: 生命周期：只启动一次；15 分钟轮询 + 唤醒后立即检查
+
+    func start() {
+        guard !started else { return }
+        started = true
+        if let c = Self.loadCache() { apply(cache: c) }
+        Task { await refresh() }
+        timer = Timer.scheduledTimer(withTimeInterval: Self.interval, repeats: true) { [weak self] _ in
+            Task { @MainActor in await self?.refresh() }
+        }
+        wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 5_000_000_000) // 等待网络恢复
+                await self?.refresh()
+            }
+        }
+    }
+
     func saveSettings() {
         UserDefaults.standard.set(sourceMode, forKey: "sourceMode")
         UserDefaults.standard.set(manualSheetURL, forKey: "officialSheetURL")
         showSettings = false
         Task { await refresh() }
     }
+
+    // MARK: 刷新
+
     func refresh() async {
-        if loading { return }
+        if loading { return }   // 防止重复请求
         loading = true
-        error = nil
-        warnings = []
         defer { loading = false; lastCheck = Date() }
         do {
             let data: BreadthSnapshot
             if sourceMode == "thirdparty" { data = try await DataFetcher.fetchThirdParty() }
             else { data = try await DataFetcher.fetchOfficial(manualSheet: manualSheetURL) }
             guard let day = data.latest else { throw MonitorError.missingData("数据源没有有效交易日") }
-            guard day.date <= DayClock.nyDate(Date()) else { throw MonitorError.invalidData("数据源包含未来交易日，已停止评分") }
+            let fresh = Freshness.evaluate(dataDate: day.date)
+            if fresh == .future { throw MonitorError.invalidData("数据源最新日期 \(day.date) 晚于最近收盘交易日，已拒绝") }
+
+            var notes: [String] = data.ratioConsistency()
+            if !TradingCalendar.isTradingDay(day.date) { notes.append("最新日期 \(day.date) 不是 NYSE 交易日，请核对") }
+            if !data.official { notes.append("当前为非官方/未核验数据源：\(data.sourceName)") }
+
+            let bundle = await DataFetcher.fetchQuotes()
+            var aligned: [String: QuoteHistory] = [:]
+            var rawLatest: [String: String] = [:]
+            for (s, h) in bundle.quotes {
+                rawLatest[s] = h.lastDate
+                let t = h.through(day.date)
+                if t.lastDate == day.date { aligned[s] = t }
+                else { notes.append("\(s)：\(h.vendor) 尚无 \(day.date) 收盘（最新 \(h.lastDate ?? "无")），该项不评分") }
+            }
+            if bundle.quotes.count < DataFetcher.etfSymbols.count {
+                notes.append(contentsOf: bundle.failures.prefix(6))
+            }
+
+            let previous = isCache ? nil : snapshot?.latest?.date
+            let cachedDate = Self.loadCache()?.snapshot.latest?.date
+            let before = previous ?? cachedDate
+            if let before, before == day.date { publishNote = "已检查：Stockbee 尚无新交易日，最新仍为 \(day.date)" }
+            else if let before { publishNote = "发现新交易日 \(day.date)（上次 \(before)）" }
+            else { publishNote = "已读取最新已发布交易日 \(day.date)" }
+
             snapshot = data
-            warnings.append(contentsOf: data.ratioConsistency())
-            if !data.official { warnings.append("当前不是经官网自动发现的官方数据：可能为第三方复算或用户自填表格，请核对其真实性和股票池") }
-            let iso = ISO8601DateFormatter()
-            if let dayDate = iso.date(from: day.date + "T22:00:00Z"), Date().timeIntervalSince(dayDate) > 4 * 86400 {
-                warnings.append("已发布数据超过4个自然日，请确认是否仍在更新")
-            }
-            var collected: [String: QuoteHistory] = [:]
-            var sources: [String: String] = [:]
-            var failures: [String] = []
-            await withTaskGroup(of: (String,QuoteHistory?,String?,String?).self) { group in
-                for symbol in ["SPY","QQQ","XLK","SMH","XLY"] {
-                    group.addTask {
-                        do {
-                            let (history, origin) = try await DataFetcher.fetchQuote(symbol)
-                            return (symbol, history.through(day.date), origin, nil)
-                        } catch { return (symbol, nil, nil, error.localizedDescription) }
-                    }
-                }
-                for await (symbol,history,source,issue) in group {
-                    if let history, history.lastDate == day.date {
-                        collected[symbol] = history
-                        sources[symbol] = source ?? ""
-                    } else {
-                        failures.append(symbol + "：" + (issue ?? "最新行情日与Stockbee交易日不一致"))
-                    }
-                }
-            }
-            // Relative strength comparisons must use the same price-data vendor.
-            if let benchmarkSource = sources["SPY"] {
-                for sector in ["XLK","SMH","XLY"] where sources[sector] != nil && sources[sector] != benchmarkSource {
-                    collected.removeValue(forKey: sector)
-                    failures.append(sector + "：与SPY行情提供商不同，为避免错误相对强度已禁用")
-                }
-            }
-            quotes = collected
-            quoteSources = sources
-            warnings.append(contentsOf: failures)
-            if data.rows.count < 10 { warnings.append("官方数据不足10个交易日：10D Ratio无法独立核验，完整评分暂不可用") }
+            quotes = aligned
+            quoteVendor = bundle.vendor?.rawValue
+            quoteRawLatest = rawLatest
+            freshness = fresh
+            warnings = notes
+            isCache = false
+            error = nil
+            lastSuccess = Date()
+            Self.saveCache(CachedState(snapshot: data, quotes: aligned, vendor: bundle.vendor?.rawValue, savedAt: Date()))
         } catch {
-            // Clear previous data to prevent stale or accidentally mixed-session scores.
-            snapshot = nil
-            quotes = [:]
-            quoteSources = [:]
             self.error = error.localizedDescription
+            if let c = Self.loadCache() { apply(cache: c) }
+            else { snapshot = nil; quotes = [:]; quoteVendor = nil; freshness = nil; warnings = [] }
         }
+    }
+
+    private func apply(cache c: CachedState) {
+        snapshot = c.snapshot
+        quotes = c.quotes
+        quoteVendor = c.vendor
+        isCache = true
+        cacheSavedAt = c.savedAt
+        freshness = c.snapshot.latest.map { Freshness.evaluate(dataDate: $0.date) }
+        warnings = ["离线缓存保存于 \(c.savedAt.formatted(date: .abbreviated, time: .shortened))，仅供查看"]
+    }
+
+    // MARK: 缓存（~/Library/Application Support/StockbeeMarketMonitor）
+
+    static var cacheDir: URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        return base.appendingPathComponent("StockbeeMarketMonitor", isDirectory: true)
+    }
+    static func saveCache(_ c: CachedState) {
+        guard ProcessInfo.processInfo.environment["STOCKBEE_NO_CACHE"] != "1" else { return }
+        do {
+            try FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
+            let enc = JSONEncoder(); enc.dateEncodingStrategy = .iso8601; enc.outputFormatting = [.prettyPrinted, .sortedKeys]
+            let data = try enc.encode(c)
+            try data.write(to: cacheDir.appendingPathComponent("latest.json"), options: .atomic)
+            if let d = c.snapshot.latest?.date {   // 按交易日归档，只读历史
+                let archive = cacheDir.appendingPathComponent("breadth-\(d).json")
+                if !FileManager.default.fileExists(atPath: archive.path) { try data.write(to: archive) }
+            }
+        } catch { }
+    }
+    static func loadCache() -> CachedState? {
+        guard ProcessInfo.processInfo.environment["STOCKBEE_NO_CACHE"] != "1",
+              let data = try? Data(contentsOf: cacheDir.appendingPathComponent("latest.json")) else { return nil }
+        let dec = JSONDecoder(); dec.dateDecodingStrategy = .iso8601
+        return try? dec.decode(CachedState.self, from: data)
     }
 }
 #endif

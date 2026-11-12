@@ -8,35 +8,45 @@ permissions:
 jobs:
   mac:
     runs-on: macos-15
-    timeout-minutes: 40
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: 环境信息
         run: |
           mkdir -p artifacts
           { sw_vers; uname -m; xcodebuild -version; swift --version; } 2>&1 | tee artifacts/env.txt
-      - name: 抓取官方原始数据
+      - name: 抓取官方原始数据（存档）
         run: bash scripts/fetch-raw.sh artifacts/raw
       - name: 单元测试
         run: swift test -j 2 2>&1 | tee artifacts/swift-test.log; exit ${PIPESTATUS[0]}
-      - name: 构建 .app
+      - name: 联网实测探针（与 App 同一套核心代码）
         if: always()
-        run: bash build-mac.command 2>&1 | tee artifacts/build.log; exit ${PIPESTATUS[0]}
-      - name: 结果写回 ci-results 分支
+        run: |
+          mkdir -p artifacts/live
+          swift run -c release stockbee-probe artifacts/live 2>&1 | grep -v '^\[' | tee artifacts/live/probe-console.log; exit ${PIPESTATUS[0]}
+      - name: 构建 .app / ZIP / DMG
+        if: always()
+        run: SKIP_TESTS=1 STOCKBEE_BUILD=${{ github.run_number }} bash build-mac.command 2>&1 | tee artifacts/build.log; exit ${PIPESTATUS[0]}
+      - name: 产物检查
         if: always()
         run: |
           set -x
-          mkdir -p /tmp/ci && cp -R artifacts /tmp/ci/ && cp dist/*.zip /tmp/ci/ 2>/dev/null || true; cp dist/*.dmg /tmp/ci/ 2>/dev/null || true
+          { file "dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac"
+            lipo -info "dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac"
+            codesign -dv "dist/Stockbee Market Monitor.app" 2>&1
+            spctl -a -vv "dist/Stockbee Market Monitor.app" 2>&1 || echo "Gatekeeper：未公证（预期）"
+            plutil -p "dist/Stockbee Market Monitor.app/Contents/Info.plist"
+            hdiutil attach dist/StockbeeMarketMonitor.dmg -nobrowse -mountpoint /tmp/sbdmg && ls -la /tmp/sbdmg && hdiutil detach /tmp/sbdmg
+            shasum -a 256 dist/StockbeeMarketMonitor.dmg dist/StockbeeMarketMonitor-macOS.zip "dist/Stockbee Market Monitor.app/Contents/MacOS/StockbeeMac"
+            ls -la dist; } 2>&1 | tee artifacts/package-check.txt
+      - name: 启动应用并截图
+        if: always()
+        run: bash scripts/ui-snapshots.sh artifacts/ui 2>&1 | tee artifacts/ui-run.log
+      - name: 结果写回 ci-results 分支
+        if: always()
+        run: |
+          mkdir -p /tmp/ci && cp -R artifacts /tmp/ci/ && cp dist/*.zip dist/*.dmg /tmp/ci/ 2>/dev/null || true
           cd /tmp/ci && echo "run=${{ github.run_number }} sha=${{ github.sha }} at=$(date -u +%FT%TZ)" > RUN.txt
           git init -q -b ci-results && git add -A
           git -c user.name=ci -c user.email=ci@localhost commit -qm "CI results run ${{ github.run_number }} for ${{ github.sha }}"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-results
-      - name: 上传产物
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mac-build-${{ github.run_number }}
-          path: |
-            artifacts/
-            dist/*.zip
-            dist/*.dmg

@@ -6,6 +6,7 @@ let package = Package(
     products: [.library(name: "StockbeeCore", targets: ["StockbeeCore"])],
     targets: [
         .target(name: "StockbeeCore", path: "Sources/StockbeeCore"),
+        .executableTarget(name: "stockbee-probe", dependencies: ["StockbeeCore"], path: "Sources/stockbee-probe"),
         .testTarget(name: "StockbeeCoreTests", dependencies: ["StockbeeCore"], path: "Tests/StockbeeCoreTests", resources: [.process("Resources")])
     ]
 )

@@ -62,6 +62,8 @@ public enum TabularParser {
     private static func which(_ header: String) -> String? {
         let h = normalized(header)
         if h == "date" || h == "day" || h == "tradingdate" || h.contains("date") { return "date" }
+        if h.contains("universe") || h.contains("worden") { return "universe" }
+        if h == "sp" || h == "sp500" || h == "spx" { return "sp500" }
         if h == "t2108" || h.contains("above40") || h.contains("40dayavg") || h.contains("40dayaverage") || h.contains("40dma") { return "t2108" }
         if (h.contains("quarter") || h.contains("65day") || h.contains("qtr")) && (h.contains("25") || h.contains("quarter")) {
             if h.contains("up") || h.contains("bull") || h.contains("gain") { return "quarterUp" }
@@ -113,7 +115,10 @@ public enum TabularParser {
                     if let t, !(0...100).contains(t) { continue }
                     let rep5 = numeric(field(row,"reported5"))
                     let rep10 = numeric(field(row,"reported10"))
-                    days[date] = BreadthDay(date: date, up4: up, down4: down, quarterUp: qUp, quarterDown: qDown, t2108: t, reported5: rep5, reported10: rep10)
+                    let universe = integer(field(row,"universe"))
+                    let sp = numeric(field(row,"sp500"))
+                    days[date] = BreadthDay(date: date, up4: up, down4: down, quarterUp: qUp, quarterDown: qDown, t2108: t,
+                                            reported5: rep5, reported10: rep10, universe: universe, sp500: sp)
                 }
                 let ordered = days.values.sorted { $0.date > $1.date }
                 if ordered.count > bestRows.count { bestRows = ordered }
