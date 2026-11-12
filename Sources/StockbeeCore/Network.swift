@@ -85,7 +85,8 @@ public enum DataFetcher {
                 } catch { details.append(error.localizedDescription) }
             }
         }
-        throw MonitorError.missingData("官方数据读取失败：" + (note.map { [$0] } ?? []).joined() + details.prefix(3).joined(separator: "；"))
+        let first = details.first ?? "未知错误"
+        throw MonitorError.missingData(note == nil ? "官方数据读取失败：\(first)" : "官网页面与官方表格均无法访问：\(first)")
     }
 
     /// 可选的非官方独立复算源。永远标注为非官方，不会自动替代官方数据。

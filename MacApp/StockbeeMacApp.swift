@@ -26,6 +26,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
+/// 不带滚动的整页，仅用于 --full 截图
+struct FullDashboard: View {
+    @EnvironmentObject var model: MonitorModel
+    var body: some View {
+        VStack(spacing: 0) {
+            HeaderBar()
+            HStack(alignment: .top, spacing: 14) {
+                LeftPanel().frame(minWidth: 520, maxWidth: .infinity)
+                RightPanel().frame(minWidth: 520, maxWidth: .infinity)
+            }
+            .padding(14)
+            StatusBar()
+        }
+        .background(Palette.background)
+        .environment(\.colorScheme, .light)
+    }
+}
+
 /// 自动化验收用：`StockbeeMac --snapshot out.png [--size 1480x1000]`
 /// 等首次联网刷新结束后，把窗口内容渲染为 PNG，并写出同名 .txt 状态摘要，然后退出。
 @MainActor enum SnapshotRunner {
@@ -42,11 +60,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if model.lastCheck != nil && !model.loading { break }
             try? await Task.sleep(nanoseconds: 500_000_000)
         }
-        guard let win = NSApp.windows.first(where: { $0.isVisible }) ?? NSApp.windows.first else { exit(2) }
-        win.setContentSize(size)
-        win.center()
-        try? await Task.sleep(nanoseconds: 2_500_000_000)
-        guard let view = win.contentView, let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { exit(3) }
+        let view: NSView
+        if args.contains("--full") {
+            // 完整内容：离屏渲染不带滚动的整页（窗口高度受屏幕限制，无法一次显示全部）
+            let host = NSHostingView(rootView: FullDashboard().environmentObject(model))
+            host.frame = NSRect(x: 0, y: 0, width: size.width, height: 400)
+            host.layoutSubtreeIfNeeded()
+            host.frame.size.height = max(400, host.fittingSize.height)
+            let off = NSWindow(contentRect: NSRect(x: -20000, y: -20000, width: host.frame.width, height: host.frame.height),
+                               styleMask: [.borderless], backing: .buffered, defer: false)
+            off.contentView = host
+            off.orderBack(nil)
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            view = host
+            size = host.frame.size
+        } else {
+            guard let win = NSApp.windows.first(where: { $0.isVisible }) ?? NSApp.windows.first else { exit(2) }
+            win.setContentSize(size)
+            win.center()
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            guard let v = win.contentView else { exit(3) }
+            view = v
+            size = v.bounds.size
+        }
+        guard let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { exit(3) }
         view.cacheDisplay(in: view.bounds, to: rep)
         if let png = rep.representation(using: .png, properties: [:]) { try? png.write(to: URL(fileURLWithPath: path)) }
         let a = model.assessment

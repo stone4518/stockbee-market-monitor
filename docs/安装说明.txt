@@ -1,0 +1,18 @@
+Stockbee Market Monitor 安装说明
+================================
+
+1. 把 “Stockbee Market Monitor.app” 拖到右侧的 “Applications”（应用程序）文件夹。
+2. 第一次打开：在“应用程序”里 右键（或按住 Control 点按）应用 → 选择“打开” → 再点“打开”。
+   如果提示“无法验证开发者”或“已损坏”：
+   打开 系统设置 → 隐私与安全性 → 页面下方点“仍要打开”；
+   或在终端执行：xattr -dr com.apple.quarantine "/Applications/Stockbee Market Monitor.app"
+3. 之后正常双击即可。
+
+说明
+- 本应用为本地 ad-hoc 签名构建，未使用 Apple Developer ID 签名，也未经过 Apple 公证（notarization），
+  因此首次打开需要按上面的方式手动放行。
+- 系统要求：macOS 13 Ventura 及以上；通用二进制，Apple Silicon 与 Intel 均可运行。
+- 需要联网：Stockbee 官网 / Google Sheets / Yahoo Finance 或 Nasdaq.com 或 Cboe。
+- 只读行情，不连接券商账户、不下单、不保存任何账号密码。
+- 卸载：删除 /Applications/Stockbee Market Monitor.app，
+  以及 ~/Library/Application Support/StockbeeMarketMonitor（本地缓存）。
