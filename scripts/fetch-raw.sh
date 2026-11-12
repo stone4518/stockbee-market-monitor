@@ -17,10 +17,15 @@ grep -o '"name":"[^"]*"' sheet_new_pubhtml.html | head -20 | tee -a fetch-log.tx
 grep -o 'id="sheet-button-[0-9]*"[^<]*<a[^>]*>[^<]*' sheet_new_pubhtml.html | head -20 | tee -a fetch-log.txt
 echo "=== new csv head ==="; head -40 sheet_new_csv.csv
 echo "=== old csv head ==="; head -15 sheet_old_csv.csv
+FROM=$(date -u -v-300d +%Y-%m-%d 2>/dev/null || date -u -d '-300 days' +%Y-%m-%d); TO=$(date -u +%Y-%m-%d)
 for s in SPY QQQ XLK SMH XLY; do
-  f "yahoo_$s.json" "https://query1.finance.yahoo.com/v8/finance/chart/$s?range=6mo&interval=1d"
-  f "stooq_$s.csv" "https://stooq.com/q/d/l/?s=$(echo $s | tr A-Z a-z).us&i=d"
+  f "yahoo1_$s.json" "https://query1.finance.yahoo.com/v8/finance/chart/$s?range=1y&interval=1d"
+  f "yahoo2_$s.json" "https://query2.finance.yahoo.com/v8/finance/chart/$s?range=1y&interval=1d"
+  curl -sS -L -m 40 -A "$UA" -H "Accept: application/json, text/plain, */*" -H "Origin: https://www.nasdaq.com" -H "Referer: https://www.nasdaq.com/" \
+     -o "nasdaq_$s.json" -w "nasdaq_$s.json http=%{http_code} bytes=%{size_download}\n" \
+     "https://api.nasdaq.com/api/quote/$s/historical?assetclass=etf&fromdate=$FROM&todate=$TO&limit=400" 2>&1 | tee -a fetch-log.txt
+  f "cboe_$s.json" "https://cdn.cboe.com/api/global/delayed_quotes/charts/historical/$s.json"
 done
-head -c 600 yahoo_SPY.json; echo; head -3 stooq_SPY.csv
+for x in yahoo1_SPY.json yahoo2_SPY.json nasdaq_SPY.json cboe_SPY.json; do echo "== $x"; head -c 700 "$x"; echo; done
 f stage2.html "https://us.stage2stocks.com/market-timing/market-monitor"
 exit 0

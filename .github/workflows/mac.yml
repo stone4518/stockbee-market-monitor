@@ -1,7 +1,10 @@
 name: macOS build & live verification
 on:
   push:
+    branches: [main]
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   mac:
     runs-on: macos-15
@@ -19,6 +22,15 @@ jobs:
       - name: 构建 .app
         if: always()
         run: bash build-mac.command 2>&1 | tee artifacts/build.log; exit ${PIPESTATUS[0]}
+      - name: 结果写回 ci-results 分支
+        if: always()
+        run: |
+          set -x
+          mkdir -p /tmp/ci && cp -R artifacts /tmp/ci/ && cp dist/*.zip /tmp/ci/ 2>/dev/null || true; cp dist/*.dmg /tmp/ci/ 2>/dev/null || true
+          cd /tmp/ci && echo "run=${{ github.run_number }} sha=${{ github.sha }} at=$(date -u +%FT%TZ)" > RUN.txt
+          git init -q -b ci-results && git add -A
+          git -c user.name=ci -c user.email=ci@localhost commit -qm "CI results run ${{ github.run_number }} for ${{ github.sha }}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-results
       - name: 上传产物
         if: always()
         uses: actions/upload-artifact@v4
