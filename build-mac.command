@@ -47,7 +47,7 @@ cp -R "$APP" "$STAGE/"; ln -s /Applications "$STAGE/Applications"
 [[ -f "docs/安装说明.txt" ]] && cp "docs/安装说明.txt" "$STAGE/"
 hdiutil create -volname "Stockbee Market Monitor" -srcfolder "$STAGE" -ov -format UDZO dist/StockbeeMarketMonitor.dmg >/dev/null
 rm -rf "$STAGE"
-echo "成功：$APP（版本 $VERSION / $BUILD）"
+echo "成功：${APP}（版本 ${VERSION} / ${BUILD}）"
 echo "ZIP：dist/StockbeeMarketMonitor-macOS.zip"
 echo "DMG：dist/StockbeeMarketMonitor.dmg"
 echo "首次打开：右键应用 →“打开”，或在 系统设置 → 隐私与安全性 中点“仍要打开”。"

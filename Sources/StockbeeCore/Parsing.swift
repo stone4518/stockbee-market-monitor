@@ -3,7 +3,10 @@ import Foundation
 public enum TabularParser {
     public static func csv(_ text: String) -> [[String]] {
         var result = [[String]](), current = [String](), cell = "", quoted = false
-        let chars = Array(text.replacingOccurrences(of: "\u{feff}", with: ""))
+        // Google Sheets 导出的 CSV 使用 CRLF；Swift 把 "\r\n" 视为一个 Character，必须先统一换行符。
+        let unified = text.replacingOccurrences(of: "\u{feff}", with: "")
+            .replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
+        let chars = Array(unified)
         var i = 0
         while i < chars.count {
             let c = chars[i]
@@ -12,8 +15,7 @@ public enum TabularParser {
                 else { quoted.toggle() }
             } else if c == "," && !quoted {
                 current.append(cell); cell = ""
-            } else if (c == "\n" || c == "\r") && !quoted {
-                if c == "\r" && i + 1 < chars.count && chars[i + 1] == "\n" { i += 1 }
+            } else if c == "\n" && !quoted {
                 current.append(cell); cell = ""
                 if current.contains(where: { !$0.isEmpty }) { result.append(current) }
                 current = []

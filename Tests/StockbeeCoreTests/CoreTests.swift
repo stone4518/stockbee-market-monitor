@@ -34,6 +34,11 @@ final class CoreTests: XCTestCase {
     func testCSV() throws {
         XCTAssertEqual(TabularParser.csv("a,b\n\"c, d\",\"e\"\"f\""), [["a","b"],["c, d","e\"f"]])
     }
+    func testCSVWithCRLF() throws {
+        // Google Sheets 实际输出为 CRLF（交接版解析器在此处失败，导致官方数据完全无法读取）
+        XCTAssertEqual(TabularParser.csv("a,b\r\n1,\"2,5\"\r\n"), [["a","b"],["1","2,5"]])
+        XCTAssertTrue(try resource("stockbee_official_2026-11-12", "csv").contains("\r\n"))
+    }
     func testParsesSyntheticRow() throws {
         let s = try synthetic()
         XCTAssertEqual(s.rows.count, 10)
